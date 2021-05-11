@@ -24,75 +24,65 @@ const moduleConfig = {
 
 
 module('CellTemplate tests', moduleConfig, () => {
-    const dataCells = [{
-        data: {
-            startDate: new Date(2020, 7, 23, 0),
-            endDate: new Date(2020, 7, 23, 1),
-            allDay: undefined,
+    const createDataCell = function(startDate, endDate, allDay) {
+        return {
+            startDate,
+            endDate,
+            allDay,
             groupIndex: undefined,
             groups: undefined,
-            text: '',
-        },
+            text: ''
+        };
+    };
+
+    const dataCells = [{
+        data: createDataCell(
+            new Date(2020, 7, 23, 0),
+            new Date(2020, 7, 23, 1),
+            undefined,
+        ),
         index: 0,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 24, 0),
-            endDate: new Date(2020, 7, 24, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 24, 0),
+            new Date(2020, 7, 24, 1),
+            undefined,
+        ),
         index: 1,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 25, 0),
-            endDate: new Date(2020, 7, 25, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 25, 0),
+            new Date(2020, 7, 25, 1),
+            undefined,
+        ),
         index: 2,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 26, 0),
-            endDate: new Date(2020, 7, 26, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 26, 0),
+            new Date(2020, 7, 26, 1),
+            undefined,
+        ),
         index: 3,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 27, 0),
-            endDate: new Date(2020, 7, 27, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 27, 0),
+            new Date(2020, 7, 27, 1),
+            undefined,
+        ),
         index: 4,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 28, 0),
-            endDate: new Date(2020, 7, 28, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 28, 0),
+            new Date(2020, 7, 28, 1),
+            undefined,
+        ),
         index: 5,
     }, {
-        data: {
-            startDate: new Date(2020, 7, 29, 0),
-            endDate: new Date(2020, 7, 29, 1),
-            allDay: undefined,
-            groupIndex: undefined,
-            groups: undefined,
-            text: '',
-        },
+        data: createDataCell(
+            new Date(2020, 7, 29, 0),
+            new Date(2020, 7, 29, 1),
+            undefined,
+        ),
         index: 6,
     }];
 
@@ -226,74 +216,53 @@ module('CellTemplate tests', moduleConfig, () => {
 
     module('Data Cell template', {}, function() {
         const allDayCells = [{
-            data: {
-                startDate: new Date(2020, 7, 23),
-                endDate: new Date(2020, 7, 23),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 23),
+                new Date(2020, 7, 23),
+                true
+            ),
             index: 0,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 24),
-                endDate: new Date(2020, 7, 24),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 24),
+                new Date(2020, 7, 24),
+                true
+            ),
             index: 1,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 25),
-                endDate: new Date(2020, 7, 25),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 25),
+                new Date(2020, 7, 25),
+                true
+            ),
             index: 2,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 26),
-                endDate: new Date(2020, 7, 26),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 26),
+                new Date(2020, 7, 26),
+                true
+            ),
             index: 3,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 27),
-                endDate: new Date(2020, 7, 27),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 27),
+                new Date(2020, 7, 27),
+                true
+            ),
             index: 4,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 28),
-                endDate: new Date(2020, 7, 28),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 28),
+                new Date(2020, 7, 28),
+                true
+            ),
             index: 5,
         }, {
-            data: {
-                startDate: new Date(2020, 7, 29),
-                endDate: new Date(2020, 7, 29),
-                allDay: true,
-                groupIndex: undefined,
-                groups: undefined,
-                text: '',
-            },
+            data: createDataCell(
+                new Date(2020, 7, 29),
+                new Date(2020, 7, 29),
+                true
+            ),
             index: 6,
         }];
 
