@@ -1178,7 +1178,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     assert.roughEqual(parseInt($dateTableScrollable.css('marginBottom'), 10), -1 * (schedulerHeaderPanelHeight + allDayPanelHeight), 1, 'dateTableScrollable element margin bottom');
                 });
 
-                test('\'"groups" and "groupIndex" shoud be correct in dateCelltTemplate', function(assert) {
+                test('\'"groups" and "groupIndex" shoud be correct in dateCellTemplate', function(assert) {
                     assert.expect(totalDateCells * 2);
 
                     const scheduler = createWrapper({
@@ -1541,7 +1541,7 @@ module('CellTemplate tests', moduleConfig, () => {
             const baseConfig = getBaseConfig(renovateRender);
 
             module(description, {}, () => {
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate', function(assert) {
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate', function(assert) {
                     assert.expect(totalTimeCells * 2);
 
                     const scheduler = createWrapper({
@@ -1555,7 +1555,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     });
                 });
 
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate '
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate '
                 + 'when vertical grouping is used in simple views', function(assert) {
                     assert.expect(32);
                     const views = viewsBase.map(({ type, intervalCount }) => ({
@@ -1588,7 +1588,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     });
                 });
 
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate '
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate '
                 + 'when vertical grouping is used in timleine views', function(assert) {
                     assert.expect(72);
                     const views = viewsBase.map(({ type, intervalCount }) => ({
@@ -1610,7 +1610,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     });
                 });
 
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate'
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate'
                 + ' when grouping by date is used', function(assert) {
                     assert.expect(totalTimeCells * 2);
                     const views = viewsBase.map(({ type, intervalCount }) => ({
@@ -1632,7 +1632,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     });
                 });
 
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate'
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate'
                 + ' when horizontal grouping is used in simple views', function(assert) {
                     assert.expect(16);
                     const views = viewsBase.map(({ type, intervalCount }) => ({
@@ -1653,7 +1653,7 @@ module('CellTemplate tests', moduleConfig, () => {
                     });
                 });
 
-                test('"groups" and "groupIndex" shoud be correct in timeCelltTemplate'
+                test('"groups" and "groupIndex" shoud be correct in timeCellTemplate'
                 + ' when horizontal grouping is used in timeline views', function(assert) {
                     assert.expect((totalTimeCells - 8) * 4);
                     const views = viewsBase.map(({ type, intervalCount }) => ({
