@@ -1,10 +1,15 @@
 import dateUtils from '../../../core/utils/date';
 import dateLocalization from '../../../localization/date';
+import messageLocalization from '../../../localization/message';
+import { camelize } from '../../../core/utils/inflector';
 import { isFunction } from '../../../core/utils/type';
+import errors from '../../../core/errors';
 
 const DAY_FORMAT = 'd';
 
 const DAYS_IN_WORK_WEEK = 5;
+
+const DEFAULT_ELEMENT = 'defaultElement';
 
 const {
     correctDateWithUnitBeginning: getPeriodStart,
@@ -314,4 +319,52 @@ export const getCaption = (options, isShort, customizationFunction) => {
     }
 
     return { startDate, endDate, text };
+};
+
+const STEP_MAP = {
+    day: 'day',
+    week: 'week',
+    workWeek: 'workWeek',
+    month: 'month',
+    timelineDay: 'day',
+    timelineWeek: 'week',
+    timelineWorkWeek: 'workWeek',
+    timelineMonth: 'month',
+    agenda: 'agenda'
+};
+
+const VIEWS = ['day', 'week', 'workWeek', 'month', 'timelineDay', 'timelineWeek', 'timelineWorkWeek', 'timelineMonth', 'agenda'];
+
+export const getStep = (view) => {
+    return STEP_MAP[view];
+};
+
+export const validateViews = (views) => {
+    views.forEach(view => {
+        const viewType = view?.type | view; // TODO (same in flat views)
+
+        if(!VIEWS.includes(viewType)) {
+            errors.log('W0008', viewType);
+        }
+    });
+};
+
+export const isDefaultItem = (item) => {
+    return Object.prototype.hasOwnProperty
+        .call(item, DEFAULT_ELEMENT);
+};
+
+export const flatViews = (views) => {
+    validateViews(views);
+
+    return views.map(view => {
+        const text = getViewText(view);
+        const type = view; // TODO (same in validateViews views) (может быть объектом)
+
+        return { text, type };
+    });
+};
+
+export const getViewText = (view) => {
+    return view.name || messageLocalization.format('dxScheduler-switcher' + camelize(view.type || view, true));
 };

@@ -1,103 +1,114 @@
-import $ from '../../../core/renderer';
-import { isObject, isDefined } from '../../../core/utils/type';
 import { extend } from '../../../core/utils/extend';
-import { each } from '../../../core/utils/iterator';
-import { inArray } from '../../../core/utils/array';
-import { camelize } from '../../../core/utils/inflector';
 import registerComponent from '../../../core/component_registrator';
-import Widget from '../../widget/ui.widget';
-import { Navigator } from './navigator';
-import DropDownMenu from '../../drop_down_menu';
-import Tabs from '../../tabs';
-import { TABS_EXPANDED_CLASS } from '../../tabs/constants';
 import errors from '../../../core/errors';
-import messageLocalization from '../../../localization/message';
+
+import Widget from '../../widget/ui.widget';
+import Toolbar from '../../toolbar';
+import SchedulerCalendar from './calendar';
+
+import {
+    getViewSwitcher,
+    getDropDownViewSwitcher,
+} from './viewSwitcher';
+import {
+    getDateNavigator
+} from './dateNavigator';
+
+import {
+    getCaption,
+    getNextIntervalDate,
+    isDefaultItem,
+    validateViews,
+    getStep,
+} from './utils';
 
 const COMPONENT_CLASS = 'dx-scheduler-header';
-const VIEW_SWITCHER_CLASS = 'dx-scheduler-view-switcher';
-const VIEW_SWITCHER_LABEL_CLASS = 'dx-scheduler-view-switcher-label';
 
-const STEP_MAP = {
-    day: 'day',
-    week: 'week',
-    workWeek: 'workWeek',
-    month: 'month',
-    timelineDay: 'day',
-    timelineWeek: 'week',
-    timelineWorkWeek: 'workWeek',
-    timelineMonth: 'month',
-    agenda: 'agenda'
-};
+const DEFAULT_AGENDA_DURATION = 7;
 
-const VIEWS = ['day', 'week', 'workWeek', 'month', 'timelineDay', 'timelineWeek', 'timelineWorkWeek', 'timelineMonth', 'agenda'];
+const SUNDAY_INDEX = 0;
 
-export class Header extends Widget {
+const DEFAULT_ELEMENT = 'defaultElement';
+
+
+export class SchedulerToolbar extends Widget {
     _getDefaultOptions() {
         return extend(super._getDefaultOptions(), {
-            views: [],
-            isAdaptive: false,
-            intervalCount: 1,
-            currentView: 'day',
-            firstDayOfWeek: undefined,
+            items: [], // Нужен ли здесь дефолт? Или он должен задаваться шедулером?
+            date: new Date(),
             currentDate: new Date(),
-            min: undefined,
-            max: undefined,
+            currentView: 'day',
+            views: [],
+            firstDayOfWeek: SUNDAY_INDEX,
+            intervalCount: 1,
             useDropDownViewSwitcher: false,
-            _dropDownButtonIcon: 'overlay'
+            isAdaptive: false,
+            agendaDuration: 7,
+            _useShortDateFormat: false,
         });
     }
 
-    _setOptionsByReference() {
-        super._setOptionsByReference();
+    _createEventMap() {
+        const config = [
+            {
+                key: 'items',
+                value: [this._render],
+            },
+            {
+                key: 'views',
+                value: [validateViews],
+            },
+            {
+                key: 'currentDate',
+                value: [this._updateCalendarOption('currentDate')],
+            },
+            {
+                key: 'displayedDate',
+                value: [this._updateCalendarOption('displayedDate')],
+            },
+            {
+                key: 'min',
+                value: [this._updateCalendarOption('min')],
+            },
+            {
+                key: 'max',
+                value: [this._updateCalendarOption('max')],
+            },
+            {
+                key: 'tabIndex',
+                value: [this._updateCalendarOption('tabIndex')],
+            },
+            {
+                key: 'focusStateEnabled',
+                value: [this._updateCalendarOption('focusStateEnabled')],
+            },
+            {
+                key: 'useDropDownViewSwitcher',
+                value: [this._render],
+            },
+        ];
 
-        extend(this._optionsByReference, {
-            currentView: true
-        });
+        this.eventMap = new Map();
+
+        config.forEach(({ key, value }) =>
+            this.eventMap.set(key, value));
+    }
+
+    _addEvent(name, event) {
+        if(!this.eventMap.has(name)) {
+            this.eventMap.set(name, []);
+        }
+
+        const events = this.eventMap.get(name);
+        this.eventMap.set(name, [...events, event]);
     }
 
     _optionChanged(args) {
-        const value = args.value;
+        const { name, value } = args;
 
-        switch(args.name) {
-            case 'views':
-                this._validateViews();
-
-                this._viewSwitcher.option({
-                    items: value,
-                    selectedItem: this.option('currentView')
-                });
-                break;
-            case 'customizeDateNavigatorText':
-                this._navigator.option(args.name, value);
-                break;
-            case 'currentView':
-                this._viewSwitcher.option('selectedItem', value);
-                this._navigator.option('step', STEP_MAP[this._getCurrentViewType()]);
-                this._changeViewSwitcherLabelText();
-                break;
-            case 'currentDate':
-                this._navigator.option('date', value);
-                break;
-            case 'displayedDate':
-                this._navigator.option('displayedDate', value);
-                break;
-            case 'min':
-            case 'max':
-            case 'firstDayOfWeek':
-            case 'intervalCount':
-                this._navigator.option(args.name, value);
-                break;
-            case 'tabIndex':
-            case 'focusStateEnabled':
-                this._viewSwitcher.option(args.name, value);
-                this._navigator.option(args.name, value);
-                super._optionChanged(args);
-                break;
-            case 'useDropDownViewSwitcher':
-                this._refreshViewSwitcher();
-                break;
-            default:
-                super._optionChanged(args);
+        const events = this.eventMap.get(name);
+        if(Array.isArray(events)) {
+            events.forEach(event => event(value));
         }
     }
 
@@ -106,160 +117,158 @@ export class Header extends Widget {
         this.$element().addClass(COMPONENT_CLASS);
     }
 
-    _initMarkup() {
-        super._initMarkup();
+    _render() {
+        super._render();
 
-        this._renderNavigator();
-        this._renderViewSwitcher();
+        this._createEventMap();
+
+        this._renderToolbar(this.$element());
+
+        this._renderCalendar(this.$element()); // TODO
     }
 
-    _renderNavigator() {
-        this._navigator = this._createComponent('<div>', Navigator, {
+    _renderToolbar($element) {
+        const config = this._createToolbarConfig();
+
+        if(!this._toolbar) {
+            this._toolbar = this._createComponent($element, Toolbar, config);
+        } else {
+            this._toolbar.option('items', config.items);
+        }
+
+    }
+
+    _createToolbarConfig() {
+        const items = this.option('items');
+
+        const parsedItems = items.map(element => {
+            return this._parseItem(element);
+        });
+
+        return {
+            items: parsedItems,
+        };
+    }
+
+    _parseItem(item) {
+        const isDefaultElement = isDefaultItem(item);
+
+        if(isDefaultElement) {
+            const defaultElementType = item[DEFAULT_ELEMENT];
+
+            switch(defaultElementType) {
+                case 'viewSwitcher':
+                    if(this.option('useDropDownViewSwitcher')) {
+                        return getDropDownViewSwitcher(this, item);
+                    }
+
+                    return getViewSwitcher(this, item);
+                case 'dateNavigator':
+                    return getDateNavigator(this, item);
+                default:
+                    errors.log(`Unknown default element type: ${defaultElementType}`);
+                    break;
+            }
+        }
+
+        return item;
+    }
+
+    _updateCurrentView(view) {
+        this._notifyObserver('currentViewUpdated', view);
+
+        const events = this.eventMap.get('currentView');
+        if(Array.isArray(events)) {
+            events.forEach(event => event(view));
+        }
+    }
+
+    _renderCalendar($element) {
+        this._calendar = this._createComponent('<div>', SchedulerCalendar, {
+            currentDate: this.option('displayedDate') || this.option('currentDate'), // TODO _updateCalendarOption меняет опции как отдельные
             min: this.option('min'),
             max: this.option('max'),
-            intervalCount: this.option('intervalCount'),
-            date: this.option('currentDate'),
-            step: STEP_MAP[this._getCurrentViewType()],
             firstDayOfWeek: this.option('firstDayOfWeek'),
-            tabIndex: this.option('tabIndex'),
             focusStateEnabled: this.option('focusStateEnabled'),
-            observer: this.option('observer'),
-            customizeDateNavigatorText: this.option('customizeDateNavigatorText'),
-            todayDate: this.option('todayDate')
-        });
-
-        this._navigator.$element().appendTo(this.$element());
-    }
-
-    _renderViewSwitcher() {
-        this._validateViews();
-
-        const $viewSwitcher = $('<div>').addClass(VIEW_SWITCHER_CLASS).appendTo(this.$element());
-        this.option('useDropDownViewSwitcher') ? this._renderViewSwitcherDropDownMenu($viewSwitcher) : this._renderViewSwitcherTabs($viewSwitcher);
-    }
-
-    _validateViews() {
-        const views = this.option('views');
-
-        each(views, function(_, view) {
-            const isViewIsObject = isObject(view);
-            const viewType = isViewIsObject && view.type ? view.type : view;
-
-            if(inArray(viewType, VIEWS) === -1) {
-                errors.log('W0008', viewType);
-            }
-        });
-    }
-
-    _getCurrentViewType() {
-        const currentView = this.option('currentView');
-        return currentView.type || currentView;
-    }
-
-    _renderViewSwitcherTabs($element) {
-        const that = this;
-
-        $element.addClass(TABS_EXPANDED_CLASS);
-
-        this._viewSwitcher = this._createComponent($element, Tabs, {
-            selectionRequired: true,
-            scrollingEnabled: true,
-            onSelectionChanged: this._updateCurrentView.bind(this),
-            items: this.option('views'),
-            itemTemplate: function(item) {
-                return $('<span>')
-                    .addClass('dx-tab-text')
-                    .text(that._getItemText(item));
-            },
-            selectedItem: this.option('currentView'),
             tabIndex: this.option('tabIndex'),
-            focusStateEnabled: this.option('focusStateEnabled')
+            onValueChanged: (e) => {
+                const date = e.value;
+                this._notifyObserver('currentDateUpdated', date);
+
+                this._calendar.hide();
+            },
         });
+
+        this._calendar.$element().appendTo($element);
     }
 
-    _getItemText(item) {
-        return item.name || messageLocalization.format('dxScheduler-switcher' + camelize(item.type || item, true));
-    }
-
-    _refreshViewSwitcher() {
-        this._viewSwitcher._dispose();
-        this._viewSwitcher.$element().remove();
-
-        delete this._viewSwitcher;
-
-        this._removeViewSwitcherLabel();
-
-        this._renderViewSwitcher();
-    }
-
-    _removeViewSwitcherLabel() {
-        if(isDefined(this._$viewSwitcherLabel)) {
-            this._$viewSwitcherLabel.detach();
-            this._$viewSwitcherLabel.remove();
-
-            delete this._$viewSwitcherLabel;
-        }
-    }
-
-    _renderViewSwitcherDropDownMenu($element) {
-        const that = this;
-
-        this._$viewSwitcherLabel = $('<div>').addClass(VIEW_SWITCHER_LABEL_CLASS).appendTo(this.$element());
-
-        this._changeViewSwitcherLabelText();
-
-        this._viewSwitcher = this._createComponent($element, DropDownMenu, {
-            onItemClick: this._updateCurrentView.bind(this),
-            buttonIcon: this.option('_dropDownButtonIcon'),
-            items: this.option('views'),
-            selectionMode: this.option('isAdaptive') ? 'single' : 'none',
-            selectedItemKeys: [this.option('currentView')],
-            itemTemplate: function(item) {
-                return $('<span>')
-                    .addClass('dx-dropdownmenu-item-text')
-                    .text(that._getItemText(item));
+    _updateCalendarOption(name) {
+        return value => {
+            if(this._calendar) {
+                this._calendar.option(name, value);
             }
-        });
+        };
     }
 
-    _changeViewSwitcherLabelText() {
-        if(!isDefined(this._$viewSwitcherLabel)) {
-            return;
-        }
-        const currentView = this.option('currentView');
-        const currentViewText = this._getItemText(currentView);
+    _getNextDate(direction, initialDate = null) {
+        const date = initialDate || this.option('currentDate');
+        const options = { ...this.intervalOptions, date };
 
-        this._$viewSwitcherLabel.text(currentViewText);
+        return getNextIntervalDate(options, direction);
     }
 
-    _getCurrentViewName(currentView) {
-        return isObject(currentView) ? currentView.name || currentView.type : currentView;
+    // TODO move to dateNavigator
+    _getCaption(date) {
+        const options = { ...this.intervalOptions, date };
+        const customizationFunction = this.option('customizeDateNavigatorText');
+        const useShortDateFormat = this.option('_useShortDateFormat');
+
+        return getCaption(options, useShortDateFormat, customizationFunction);
     }
 
-    _updateCurrentView(e) {
-        const selectedItem = e.itemData || e.component.option('selectedItem');
+    _updateCurrentDate(direction) {
+        const newDate = this._getNextDate(direction);
 
-        const viewName = this._getCurrentViewName(selectedItem);
-
-        this.notifyObserver('currentViewUpdated', viewName);
+        this._notifyObserver('currentDateUpdated', newDate);
     }
 
-    _renderFocusTarget() {}
+    _showCalendar(e) {
+        this._calendar.show(e.element);
+    }
 
-    notifyObserver(subject, args) {
+    _hideCalendar() {
+        this._calendar.hide();
+    }
+
+    // TODO пропатчить текущей вьюхой
+    get views() {
+        return this.option('views');
+    }
+
+    get date() {
+        return this.option('displayedDate') || this.option('currentDate');
+    }
+
+    // TODO move to dateNavigator
+    get captionText() {
+        return this._getCaption(this.date).text;
+    }
+
+    get intervalOptions() {
+        const step = getStep(this.option('currentView'));
+        const intervalCount = this.option('intervalCount');
+        const firstDayOfWeek = this.option('firstDayOfWeek') || SUNDAY_INDEX; // TODO
+        const agendaDuration = this.option('agendaDuration') || DEFAULT_AGENDA_DURATION;
+
+        return { step, intervalCount, firstDayOfWeek, agendaDuration };
+    }
+
+    _notifyObserver(subject, args) {
         const observer = this.option('observer');
         if(observer) {
             observer.fire(subject, args);
         }
     }
-
-    invoke() {
-        const observer = this.option('observer');
-
-        if(observer) {
-            return observer.fire.apply(observer, arguments);
-        }
-    }
 }
 
-registerComponent('dxSchedulerHeader', Header);
+registerComponent('dxSchedulerHeader', SchedulerToolbar);

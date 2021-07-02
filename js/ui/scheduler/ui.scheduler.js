@@ -41,7 +41,7 @@ import { MobileTooltipStrategy } from './tooltip_strategies/mobileTooltipStrateg
 import { hide as hideLoading, show as showLoading } from './loading';
 import AppointmentCollection from './appointments/appointmentCollection';
 import AppointmentLayoutManager from './appointments.layout_manager';
-import { Header } from './header/header';
+import { SchedulerToolbar } from './header/header';
 import subscribes from './subscribes';
 import { getRecurrenceProcessor } from './recurrence';
 import timeZoneUtils from './utils.timeZone';
@@ -757,6 +757,9 @@ class Scheduler extends Widget {
             case '_draggingMode':
                 this._workSpace.option('draggingMode', value);
                 break;
+            case 'toolbar':
+                this._header.option('items', value);
+                break;
             default:
                 super._optionChanged(args);
         }
@@ -1337,7 +1340,8 @@ class Scheduler extends Widget {
 
     _renderHeader() {
         const $header = $('<div>').appendTo(this.$element());
-        this._header = this._createComponent($header, Header, this._headerConfig());
+        this._header = this._createComponent($header, SchedulerToolbar, this._headerConfig());
+        // this._header = this._createComponent($header, Header, this._headerConfig());
     }
 
     _headerConfig() {
@@ -1351,7 +1355,7 @@ class Scheduler extends Widget {
             tabIndex: this.option('tabIndex'),
             focusStateEnabled: this.option('focusStateEnabled'),
             width: this.option('width'),
-            rtlEnabled: this.option('rtlEnabled'),
+            rtlEnabled: this.option('rtlEnabled'), // вероятно как и некоторые другие опции эта используется непосредственно в компоненте widget
             useDropDownViewSwitcher: this.option('useDropDownViewSwitcher'),
             _dropDownButtonIcon: this.option('_dropDownButtonIcon'),
             customizeDateNavigatorText: this.option('customizeDateNavigatorText')
@@ -1368,6 +1372,8 @@ class Scheduler extends Widget {
             const result = getTimeZoneCalculator(this.key).createDate(new Date(), { path: 'toGrid' });
             return result;
         };
+
+        result.items = this.option('toolbar');
 
         return result;
     }

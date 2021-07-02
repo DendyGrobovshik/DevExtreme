@@ -50,7 +50,8 @@ $generic-scheduler-appointment-empty-transparent-border: 1px solid transparent;
 
 $generic-scheduler-all-day-table-cell-height: $generic-scheduler-workspace-date-table-cell-height * 1.5;
 $generic-scheduler-collapsed-all-day-table-cell-height: $generic-scheduler-workspace-date-table-cell-height * 0.5;
-$generic-scheduler-header-panel-table-cell-height: $generic-scheduler-workspace-date-table-cell-height - $generic-scheduler-header-panel-top-gap;
+$generic-scheduler-header-panel-table-cell-height: $generic-scheduler-workspace-date-table-cell-height -
+  $generic-scheduler-header-panel-top-gap;
 
 $generic-scheduler-current-time-cell-border-size: 2px;
 
@@ -72,7 +73,7 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   height: $generic-scheduler-workspace-date-table-cell-height;
 
   &::after {
-    content: '';
+    content: "";
   }
 }
 
@@ -94,9 +95,10 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 }
 
 :not(.dx-scheduler-work-space-vertical-grouped) {
-  @include baseScheduler.dx-scheduler-all-day-title-mixin($generic-scheduler-header-height + $generic-scheduler-header-panel-top-gap);
+  @include baseScheduler.dx-scheduler-all-day-title-mixin(
+    $generic-scheduler-header-height + $generic-scheduler-header-panel-top-gap
+  );
 }
-
 
 .dx-scheduler-work-space-week,
 .dx-scheduler-work-space-work-week {
@@ -105,7 +107,9 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   }
 
   &:not(.dx-scheduler-work-space-vertical-grouped) {
-    @include baseScheduler.dx-scheduler-all-day-title-mixin($generic-scheduler-header-height + $generic-scheduler-workspace-date-table-cell-height);
+    @include baseScheduler.dx-scheduler-all-day-title-mixin(
+      $generic-scheduler-header-height + $generic-scheduler-workspace-date-table-cell-height
+    );
   }
 }
 
@@ -146,13 +150,21 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 
 .dx-scheduler-work-space {
   &:not(.dx-scheduler-work-space-vertical-grouped) {
-    @include baseScheduler.dx-scheduler-scrollable-offset-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap, $generic-scheduler-all-day-table-cell-height, $generic-scheduler-collapsed-all-day-table-cell-height);
+    @include baseScheduler.dx-scheduler-scrollable-offset-mixin(
+      $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap,
+      $generic-scheduler-all-day-table-cell-height,
+      $generic-scheduler-collapsed-all-day-table-cell-height
+    );
   }
 }
 
 .dx-scheduler-work-space-day {
   &:not(.dx-scheduler-work-space-vertical-grouped) {
-    @include baseScheduler.dx-scheduler-scrollable-offset-mixin($generic-scheduler-header-panel-top-gap, $generic-scheduler-all-day-table-cell-height, $generic-scheduler-collapsed-all-day-table-cell-height);
+    @include baseScheduler.dx-scheduler-scrollable-offset-mixin(
+      $generic-scheduler-header-panel-top-gap,
+      $generic-scheduler-all-day-table-cell-height,
+      $generic-scheduler-collapsed-all-day-table-cell-height
+    );
   }
 
   &:not(.dx-scheduler-work-space-grouped) {
@@ -162,13 +174,19 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   }
 
   &.dx-scheduler-work-space-count:not(.dx-scheduler-work-space-vertical-grouped) {
-    @include baseScheduler.dx-scheduler-scrollable-offset-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap, $generic-scheduler-all-day-table-cell-height, $generic-scheduler-collapsed-all-day-table-cell-height);
+    @include baseScheduler.dx-scheduler-scrollable-offset-mixin(
+      $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap,
+      $generic-scheduler-all-day-table-cell-height,
+      $generic-scheduler-collapsed-all-day-table-cell-height
+    );
 
     .dx-scheduler-header-panel {
       margin-top: $generic-scheduler-header-panel-top-gap;
     }
 
-    @include baseScheduler.dx-scheduler-all-day-title-mixin($generic-scheduler-header-height + $generic-scheduler-workspace-date-table-cell-height);
+    @include baseScheduler.dx-scheduler-all-day-title-mixin(
+      $generic-scheduler-header-height + $generic-scheduler-workspace-date-table-cell-height
+    );
 
     .dx-scheduler-all-day-title {
       top: $generic-scheduler-header-height + $generic-scheduler-workspace-date-table-cell-height;
@@ -186,7 +204,9 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 
 .dx-scheduler-work-space-month {
   &:not(.dx-scheduler-work-space-vertical-grouped) {
-    @include baseScheduler.dx-scheduler-group-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+    @include baseScheduler.dx-scheduler-group-mixin(
+      $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap
+    );
   }
 
   .dx-scheduler-appointment-content {
@@ -203,94 +223,61 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   background-color: $scheduler-header-bg;
   border: baseScheduler.$scheduler-base-border;
   height: $generic-scheduler-header-height;
-}
 
-.dx-scheduler-navigator {
-  padding: ($generic-scheduler-header-height - $generic-scheduler-navigator-height) * 0.5;
+  .dx-toolbar-items-container {
+    .dx-scheduler-view-switcher {
+      font-size: $generic-scheduler-view-switcher-font-size;
 
-  .dx-button {
-    margin-top: -1px;
-    height: $generic-scheduler-navigator-height;
-  }
+      .dx-toolbar-item-content {
+        .dx-buttongroup {
+          .dx-button {
+            position: relative;
 
-  .dx-button-has-icon .dx-button-content {
-    padding: $generic-scheduler-navigation-buttons-padding;
-  }
-}
+            &.dx-item-selected::after,
+            &.dx-state-focused::after {
+              content: "";
+              position: absolute;
+              height: 100%;
+              right: -1px;
+              left: -1px;
+              bottom: -1px;
+              z-index: 1;
+              border-left: baseScheduler.$scheduler-base-border;
+              border-right: baseScheduler.$scheduler-base-border;
+            }
 
-.dx-scheduler-navigator-caption {
-  border-radius: 0;
-  border-right-width: 0;
-  border-left-width: 0;
+            &.dx-item-selected {
+              background-color: $scheduler-tab-selected-bg; // TODO rename
 
-  &.dx-state-focused,
-  &.dx-state-hover,
-  &.dx-state-active {
-    border-right-width: 1px;
-    border-left-width: 1px;
-  }
-}
+              &::before {
+                position: absolute;
+                bottom: -2px;
+                width: 100%;
+                height: 2px;
+                content: "";
+                right: 0;
+                background-color: $scheduler-tab-selected-before-bg;
+              }
+            }
 
-.dx-scheduler-navigator-previous {
-  border-radius: $generic-scheduler-navigator-border-radius 0 0 $generic-scheduler-navigator-border-radius;
+            &.dx-state-focused::after {
+              top: -1px;
+              border-top: $generic-scheduler-focused-tab-border;
+              border-bottom: none;
+            }
 
-  .dx-rtl & {
-    border-radius: 0 $generic-scheduler-navigator-border-radius $generic-scheduler-navigator-border-radius 0;
-  }
-}
-
-.dx-scheduler-navigator-next {
-  border-radius: 0 $generic-scheduler-navigator-border-radius $generic-scheduler-navigator-border-radius 0;
-
-  .dx-rtl & {
-    border-radius: $generic-scheduler-navigator-border-radius 0 0 $generic-scheduler-navigator-border-radius;
-  }
-}
-
-.dx-scheduler-view-switcher.dx-tabs {
-  font-size: $generic-scheduler-view-switcher-font-size;
-
-  .dx-tab {
-    &:not(.dx-tab-selected):not(.dx-state-hover) {
-      background: none;
-    }
-
-    &.dx-tab-selected {
-      background-color: $scheduler-tab-selected-bg;
-
-      &::before {
-        background-color: $scheduler-tab-selected-before-bg;
+            &.dx-state-hover {
+              background-color: $scheduler-tab-selected-bg;
+            }
+          }
+        }
       }
     }
-
-    &.dx-state-focused::after {
-      border-left: baseScheduler.$scheduler-base-border;
-      border-right: baseScheduler.$scheduler-base-border;
-      border-top: $generic-scheduler-focused-tab-border;
-      border-bottom: none;
-    }
-
-    &.dx-tab-selected::after {
-      height: $generic-scheduler-header-height;
-    }
   }
 }
 
-.dx-scheduler-view-switcher.dx-dropdownmenu {
-  margin-top: ($generic-scheduler-header-height - $generic-scheduler-navigator-height) * 0.5 - 1px;
-}
-
-.dx-scheduler-view-switcher-label {
-  margin-top: ($generic-scheduler-header-height - $generic-scheduler-navigator-height) * 0.8;
-  right: $generic-scheduler-switcher-label-offset;
-
-  .dx-rtl & {
-    left: $generic-scheduler-switcher-label-offset;
-    right: auto;
-  }
-}
-
-.dx-scheduler-header-panel { // stylelint-disable-line no-duplicate-selectors
+.dx-scheduler-header-panel {
+  // stylelint-disable-line no-duplicate-selectors
   .dx-scheduler-group-row {
     &:not(:first-child) {
       border-bottom: baseScheduler.$scheduler-base-border;
@@ -316,7 +303,8 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   background-color: $scheduler-alldaypanel-bg;
 }
 
-.dx-scheduler-work-space { // stylelint-disable-line no-duplicate-selectors
+.dx-scheduler-work-space {
+  // stylelint-disable-line no-duplicate-selectors
   padding-top: $generic-scheduler-header-height;
   margin-top: -$generic-scheduler-header-height;
 
@@ -328,7 +316,6 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
     .dx-scheduler-date-table-cell {
       border-left: baseScheduler.$scheduler-base-border;
     }
-
 
     &.dx-scheduler-agenda {
       .dx-scheduler-date-table-cell {
@@ -351,7 +338,8 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   }
 }
 
-.dx-scheduler-date-table-cell { // stylelint-disable-line no-duplicate-selectors
+.dx-scheduler-date-table-cell {
+  // stylelint-disable-line no-duplicate-selectors
   border-left: baseScheduler.$scheduler-base-border;
   border-right: baseScheduler.$scheduler-base-border;
 }
@@ -524,7 +512,8 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 
 .dx-scheduler-work-space-grouped {
   &:not(.dx-scheduler-work-space-all-day):not(.dx-scheduler-timeline):not(.dx-scheduler-agenda):not(.dx-scheduler-work-space-vertical-grouped):not(.dx-scheduler-work-space-horizontal-grouped) {
-    $header-scroll-bar-top-offset: $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap;
+    $header-scroll-bar-top-offset: $generic-scheduler-header-panel-table-cell-height +
+      $generic-scheduler-header-panel-top-gap;
 
     @include baseScheduler.dx-scheduler-header-scrollable-mixin($header-scroll-bar-top-offset);
     @include baseScheduler.dx-scheduler-group-mixin($header-scroll-bar-top-offset);
@@ -534,8 +523,12 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
       @include baseScheduler.dx-scheduler-header-scrollable-mixin($header-scroll-bar-top-offset);
 
       &:not(.dx-scheduler-work-space-count) {
-        @include baseScheduler.dx-scheduler-group-mixin($header-scroll-bar-top-offset - $generic-scheduler-header-panel-table-cell-height);
-        @include baseScheduler.dx-scheduler-header-scrollable-mixin($header-scroll-bar-top-offset - $generic-scheduler-header-panel-table-cell-height);
+        @include baseScheduler.dx-scheduler-group-mixin(
+          $header-scroll-bar-top-offset - $generic-scheduler-header-panel-table-cell-height
+        );
+        @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+          $header-scroll-bar-top-offset - $generic-scheduler-header-panel-table-cell-height
+        );
       }
     }
   }
@@ -544,7 +537,9 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 .dx-scheduler-work-space.dx-scheduler-timeline-week,
 .dx-scheduler-work-space.dx-scheduler-timeline-work-week,
 .dx-scheduler-work-space.dx-scheduler-work-space-count.dx-scheduler-timeline-day {
-  @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-header-panel-table-cell-height * 2 + $generic-scheduler-header-panel-top-gap);
+  @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+    $generic-scheduler-header-panel-table-cell-height * 2 + $generic-scheduler-header-panel-top-gap
+  );
 
   &.dx-scheduler-work-space-grouped {
     .dx-scheduler-sidebar-scrollable {
@@ -553,7 +548,8 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
 
       &::before {
         height: $generic-scheduler-header-panel-table-cell-height * 2 + $generic-scheduler-header-panel-top-gap + 1;
-        margin-top: -($generic-scheduler-header-panel-table-cell-height * 2 + $generic-scheduler-header-panel-top-gap + 1);
+        margin-top: -($generic-scheduler-header-panel-table-cell-height * 2 + $generic-scheduler-header-panel-top-gap +
+              1);
       }
     }
   }
@@ -569,35 +565,48 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
     background-color: $scheduler-alldaypanel-bg;
 
     &::before {
-      background-color: $scheduler-workspace-background-color,;
+      background-color: $scheduler-workspace-background-color;
     }
   }
 
-  @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
-
+  @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+    $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap
+  );
 
   &.dx-scheduler-work-space-day {
     @include baseScheduler.dx-scheduler-header-scrollable-mixin(0);
   }
 
   &.dx-scheduler-work-space.dx-scheduler-work-space-all-day {
-    @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-all-day-table-cell-height + $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+    @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+      $generic-scheduler-all-day-table-cell-height + $generic-scheduler-header-panel-table-cell-height +
+        $generic-scheduler-header-panel-top-gap
+    );
 
     &.dx-scheduler-work-space-vertical-grouped {
-      @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+      @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+        $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap
+      );
     }
 
     &:not(.dx-scheduler-work-space-vertical-grouped) {
       &.dx-scheduler-work-space-all-day-collapsed {
-        @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-collapsed-all-day-table-cell-height + $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+        @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+          $generic-scheduler-collapsed-all-day-table-cell-height + $generic-scheduler-header-panel-table-cell-height +
+            $generic-scheduler-header-panel-top-gap
+        );
       }
 
       &.dx-scheduler-work-space-day {
         &:not(.dx-scheduler-work-space-count) {
-          @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-all-day-table-cell-height + $generic-scheduler-header-panel-top-gap);
+          @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+            $generic-scheduler-all-day-table-cell-height + $generic-scheduler-header-panel-top-gap
+          );
 
           &.dx-scheduler-work-space-all-day-collapsed {
-            @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-collapsed-all-day-table-cell-height + $generic-scheduler-header-panel-top-gap);
+            @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+              $generic-scheduler-collapsed-all-day-table-cell-height + $generic-scheduler-header-panel-top-gap
+            );
           }
         }
 
@@ -605,7 +614,9 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
           @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-all-day-table-cell-height);
 
           &.dx-scheduler-work-space-all-day-collapsed {
-            @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-collapsed-all-day-table-cell-height);
+            @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+              $generic-scheduler-collapsed-all-day-table-cell-height
+            );
           }
         }
       }
@@ -613,11 +624,15 @@ $generic-scheduler-agenda-group-header-padding: $generic-scheduler-agenda-time-c
   }
 
   &.dx-scheduler-work-space.dx-scheduler-work-space-month {
-    @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+    @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+      $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap
+    );
   }
 
   &.dx-scheduler-work-space-vertical-grouped {
-    @include baseScheduler.dx-scheduler-header-scrollable-mixin($generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap);
+    @include baseScheduler.dx-scheduler-header-scrollable-mixin(
+      $generic-scheduler-header-panel-table-cell-height + $generic-scheduler-header-panel-top-gap
+    );
   }
 }
 
