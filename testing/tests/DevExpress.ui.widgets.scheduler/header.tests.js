@@ -6,22 +6,6 @@ import 'ui/drop_down_button';
 
 testStart(() => initTestMarkup());
 
-// Обновление caption после смены currentDate, currentVierw, firstDayOfWeek (проверить, что navigator будет рабоать с новым значением)
-
-// TODO тесты на смену разных опций динамически
-
-// Tect на то, что формируется правильный конфиг(пртдётся залезть в приват*)
-
-// TODO тест на обновление значений календаря
-
-// TODO проверить, что у календаря tabIndex = 1\
-// TODO - кастомизация tabIndex для пользователей
-
-// TODO тест на _dropDownButtonIcon, она должна быть выставленна в хэдере, и видимо влиять на иконка dropDownMenu(сейчас это происходит через css)
-
-// TODO тест на опцию step для агенды
-
-// TODO - аналогичные тесты должны быть и для dropdownviewswitcher
 test('Scheduler with basic toolbar configuration should has navigator and view switcher', function(assert) {
     createWrapper({
         views: ['day'],
@@ -42,7 +26,6 @@ test('Toolbar should have correct deafult views', function(assert) {
     );
 });
 
-// TODO
 test('Toolbar view switcher only one element is not selected(not in currentView)', function(assert) {
     const scheduler = createWrapper({
         views: ['month'],
@@ -252,6 +235,54 @@ module('Option Changing', {}, () => {
 
         assert.equal(viewSwitcher.getText(), 'Day', 'after option chaning displayed only dropDownButton label');
     });
+
+    test('Date Navigator caption is correct after changing currentDate option', function(assert) {
+        const scheduler = createWrapper({
+            views: ['day'],
+            currentView: 'day',
+            currentDate: new Date(2020, 6, 7),
+        });
+        scheduler.option('currentDate', new Date(2021, 5, 4));
+        assert.equal(scheduler.header.navigator.getText(), '4 June 2021', 'Caption is correct');
+    });
+
+    test('Date Navigator caption is correct after changing currentView option', function(assert) {
+        const scheduler = createWrapper({
+            views: ['month', 'day'],
+            currentView: 'day',
+            currentDate: new Date(2021, 6, 7),
+        });
+        scheduler.option('currentView', 'month');
+        assert.equal(scheduler.header.navigator.getText(), 'July 2021', 'Caption is correct');
+    });
+
+    test('Date Navigator caption is correct after changing firstDayOfWeek option', function(assert) {
+        const scheduler = createWrapper({
+            views: ['week'],
+            currentView: 'week',
+            currentDate: new Date(2021, 6, 7),
+        });
+        scheduler.option('firstDayOfWeek', 4);
+        assert.equal(scheduler.header.navigator.getText(), '1-7 July 2021', 'Caption is correct');
+    });
+
+
+    test('Date Navigator caption is correct after changing agendaDuration option', function(assert) {
+        const scheduler = createWrapper({
+            views: [{
+                type: 'agenda',
+                agendaDuration: 5,
+            }],
+            currentView: 'agemda',
+            currentDate: new Date(2021, 6, 7),
+        });
+        assert.equal(scheduler.header.navigator.getText(), '7-11 July 2021', 'Caption is correct');
+        scheduler.option('views', [{
+            type: 'agenda',
+            agendaDuration: 3,
+        }]);
+        assert.equal(scheduler.header.navigator.getText(), '7-9 July 2021', 'Caption is correct');
+    });
 });
 
 
@@ -316,31 +347,6 @@ module('Interface Interaction', {}, () => {
         viewSwitcher.getButton('Month').click();
         assert.equal(viewSwitcher.selected.getText(), 'Month', 'current view is correct');
     });
-
-    // TODO - нужно проверять, не то, что календапрь находится в DOM дереве,
-    // а то, что popup активен
-    // test('Calendar should be displayed after click on caption', function(assert) {
-    //     const scheduler = createWrapper({
-    //         currentDate: new Date(2021, 6, 5),
-    //         min: new Date(2021, 6, 4),
-    //         max: new Date(2021, 6, 6),
-    //
-    //         views: ['day', 'week', 'month'],
-    //         currentView: 'day',
-    //         height: 600,
-    //     });
-
-    //     const calendar = scheduler.header.calendar;
-    //     const calendarButton = scheduler.header.navigator.calendarButton;
-
-    //     assert.equal(calendar.isOpen(), false, 'Calendar should closed by default');
-
-    //     calendarButton.click();
-    //     assert.equal(calendar.isOpen(), true, 'Calendar should be opened after click');
-
-    //     calendarButton.click();
-    //     assert.equal(calendar.isOpen(), false, 'Calendar should be closed after second click');
-    // });
 
     test('Notify observer should be called after selecting view', function(assert) {
         const scheduler = createWrapper({

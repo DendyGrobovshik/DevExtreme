@@ -1,4 +1,3 @@
-
 import dateUtils from '../../../core/utils/date';
 
 const { trimTime } = dateUtils;
@@ -13,14 +12,13 @@ const NEXT_BUTTON_CLASS = 'dx-scheduler-navigator-next';
 const DIRECTION_LEFT = -1;
 const DIRECTION_RIGHT = 1;
 
-export function getDateNavigator(header, item) {
+export const getDateNavigator = (header, item) => {
     const items = [
         previousButtonOptions(header),
         calendarButtonOptions(header),
         nextButtonOptions(header),
     ];
 
-    // TODO
     const stylingMode = header.option('useDropDownViewSwitcher') ? 'text' : 'contained';
 
     return {
@@ -32,21 +30,19 @@ export function getDateNavigator(header, item) {
             keyExpr: 'key',
             height: '35px',
             stylingMode,
-            onItemClick: function(e) {
+            onItemClick: (e) => {
                 e.itemData.clickHandler(e);
             },
         },
     };
-}
+};
 
-// TODO выставить aria
-function previousButtonOptions(header) {
+const previousButtonOptions = (header) => {
     return {
         key: 'previous',
         icon: 'chevronprev',
-        clickHandler: () => header._updateCurrentDate(DIRECTION_LEFT),
-
         elementAttr: { class: PREVIOUS_BUTTON_CLASS, ariaLabel: 'Previous period' },
+        clickHandler: () => header._updateDateInDirection(DIRECTION_LEFT),
         onContentReady: (e) => {
             const previousButton = e.component;
             previousButton.option('disabled', isPreviousButtonDisabled(header));
@@ -65,15 +61,14 @@ function previousButtonOptions(header) {
             });
         },
     };
-}
+};
 
-function calendarButtonOptions(header) {
+const calendarButtonOptions = (header) => {
     return {
         key: 'calendar',
         text: header.captionText,
-        clickHandler: (e) => header._showCalendar(e),
-
         elementAttr: { class: `${CALENDAR_CAPTION_CLASS} ${CALENDAR_BUTTON_CLASS}` },
+        clickHandler: (e) => header._showCalendar(e),
         onContentReady: (e) => {
             const calendarButton = e.component;
 
@@ -92,17 +87,20 @@ function calendarButtonOptions(header) {
             header._addEvent('views', () => {
                 calendarButton.option('text', header.captionText);
             });
+
+            header._addEvent('firstDayOfWeek', () => {
+                calendarButton.option('text', header.captionText);
+            });
         },
     };
-}
+};
 
-function nextButtonOptions(header) {
+const nextButtonOptions = (header) => {
     return {
         key: 'next',
         icon: 'chevronnext',
-        clickHandler: () => header._updateCurrentDate(DIRECTION_RIGHT),
-
         elementAttr: { class: NEXT_BUTTON_CLASS },
+        clickHandler: () => header._updateDateInDirection(DIRECTION_RIGHT),
         onContentReady: (e) => {
             const nextButton = e.component;
 
@@ -121,9 +119,9 @@ function nextButtonOptions(header) {
             });
         },
     };
-}
+};
 
-function isPreviousButtonDisabled(header) {
+const isPreviousButtonDisabled = (header) => {
     let min = header.option('min');
 
     const date = header.date;
@@ -132,9 +130,9 @@ function isPreviousButtonDisabled(header) {
     min = min ? trimTime(min) : min;
 
     return min && !isNaN(min.getTime()) && header._getNextDate(-1, caption.endDate) < min;
-}
+};
 
-function isNextButtonDisabled(header) {
+const isNextButtonDisabled = (header) => {
     let max = header.option('max');
 
     const date = header.date;
@@ -144,4 +142,4 @@ function isNextButtonDisabled(header) {
     max && max.setHours(23, 59, 59);
 
     return max && !isNaN(max.getTime()) && header._getNextDate(1, caption.startDate) > max;
-}
+};

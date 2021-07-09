@@ -21,7 +21,7 @@ export const CLASSES = {
     button: '.dx-button',
     selected: '.dx-item-selected',
 
-    header: '.dx-scheduler-header',
+    header: '.dx-scheduler-header-panel',
     navigator: '.dx-scheduler-navigator',
     navigatorCaption: '.dx-scheduler-navigator-caption',
     navigatorPrevButton: '.dx-scheduler-navigator-previous',
@@ -318,7 +318,7 @@ class Calendar extends ElementWrapper {
 
 class NavigatorPopover extends ElementWrapper {
     get isVisible() {
-        return this.content.getElement().is(':visible');
+        return this.getElement().is(':visible');
     }
 
     get calendar() {
@@ -326,7 +326,7 @@ class NavigatorPopover extends ElementWrapper {
     }
 
     get hasScroll() {
-        return this.content.getElement().find('.dx-scrollable').length > 0;
+        return this.getElement().find('.dx-scrollable').length > 0;
     }
 }
 
@@ -352,13 +352,8 @@ class NavigatorWrapper extends ElementWrapper {
     }
 
     get popover() {
-        return new NavigatorPopover(CLASSES.navigatorPopover);
+        return new NavigatorPopover(CLASSES.navigatorPopover, false, 1);
     }
-
-    // TODO - already in ElementWrapper
-    // getText() {
-    //     return this.getElement().text();
-    // }
 }
 
 class ViewSwitcherWrapper extends ElementWrapper {
@@ -374,31 +369,23 @@ class ViewSwitcherWrapper extends ElementWrapper {
         return new ClickElementWrapper(CLASSES.selected);
     }
 
-    getButton(text) {
+    click(name) {
+        this.getButton(name).click();
+    }
+
+    getButton(name) {
         const parent = this.getElement();
 
         const buttons = parent.find('.dx-button');
 
         let result;
         buttons.each((index, button) => {
-            if($(button).text() === text) {
+            if($(button).text() === name) {
                 result = new ClickElementWrapper(CLASSES.button, parent, index);
                 // TODO return false;
             }
         });
 
-        return result;
-    }
-}
-
-class CalendarWrapper extends ClickElementWrapper {
-    constructor() {
-        super(CLASSES.calendar);
-    }
-
-    isOpen() {
-        const result = this.getElement().length > 0;
-        debugger
         return result;
     }
 }
@@ -414,10 +401,6 @@ class HeaderWrapper extends ElementWrapper {
 
     get viewSwitcher() {
         return new ViewSwitcherWrapper();
-    }
-
-    get calendar() {
-        return new CalendarWrapper();
     }
 }
 

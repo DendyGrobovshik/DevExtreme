@@ -80,6 +80,8 @@ const WIDGET_SMALL_WIDTH = 400;
 const FULL_DATE_FORMAT = 'yyyyMMddTHHmmss';
 const UTC_FULL_DATE_FORMAT = FULL_DATE_FORMAT + 'Z';
 
+const DEFAULT_AGENDA_DURATION = 7;
+
 const VIEWS_CONFIG = {
     day: {
         workSpace: SchedulerWorkSpaceDay,
@@ -394,6 +396,17 @@ class Scheduler extends Widget {
             _collectorOffset: 0,
             _appointmentOffset: 26,
 
+            toolbar: [
+                {
+                    location: 'before',
+                    defaultElement: 'dateNavigator',
+                },
+                {
+                    location: 'after',
+                    defaultElement: 'viewSwitcher',
+                }
+            ]
+
             /**
                 * @name dxSchedulerOptions.activeStateEnabled
                 * @hidden
@@ -509,9 +522,8 @@ class Scheduler extends Widget {
                 value = dateUtils.trimTime(new Date(value));
                 this.option('selectedCellData', []);
                 this._workSpace.option(name, new Date(value));
-                this._header.option(name, new Date(value));
-                this._header.option('displayedDate', this._workSpace._getViewStartByOptions());
-                this._appointments.option('items', []);
+                this._header.option(name, new Date(value)); // TODO объеденить эта две опции, чтобы в шедулер передавать только одну
+                this._header.option('displayedDate', this._workSpace._getViewStartByOptions()); // если задана disaplayed date, то любое измененение currentDate не должно оказывать воздействие?
                 this._filterAppointmentsByDate();
 
                 this._postponeDataSourceLoading();
@@ -768,7 +780,7 @@ class Scheduler extends Widget {
     _updateHeader() {
         const viewCountConfig = this._getViewCountConfig();
         this._header.option('intervalCount', viewCountConfig.intervalCount);
-        this._header.option('displayedDate', this._workSpace._getViewStartByOptions());
+        this._header.option('displayedDate', this._workSpace._getViewStartByOptions()); // TODO
         this._header.option('min', this._dateOption('min'));
         this._header.option('max', this._dateOption('max'));
         this._header.option('currentDate', this._dateOption('currentDate'));
@@ -1341,25 +1353,21 @@ class Scheduler extends Widget {
     _renderHeader() {
         const $header = $('<div>').appendTo(this.$element());
         this._header = this._createComponent($header, SchedulerToolbar, this._headerConfig());
-        // this._header = this._createComponent($header, Header, this._headerConfig());
     }
 
-    // TODO - убрать неиспользуемые опции
     _headerConfig() {
         const currentViewOptions = this._getCurrentViewOptions();
         const countConfig = this._getViewCountConfig();
 
         const result = extend({
-            isAdaptive: this.option('adaptivityEnabled'),
             firstDayOfWeek: this.option('firstDayOfWeek'),
             currentView: this._currentView,
             tabIndex: this.option('tabIndex'),
             focusStateEnabled: this.option('focusStateEnabled'),
-            width: this.option('width'),
-            rtlEnabled: this.option('rtlEnabled'), // вероятно как и некоторые другие опции эта используется непосредственно в компоненте widget
+            rtlEnabled: this.option('rtlEnabled'),
             useDropDownViewSwitcher: this.option('useDropDownViewSwitcher'),
-            _dropDownButtonIcon: this.option('_dropDownButtonIcon'),
-            customizeDateNavigatorText: this.option('customizeDateNavigatorText')
+            customizeDateNavigatorText: this.option('customizeDateNavigatorText'),
+            agendaDuration: this.option('agendaDuration') || DEFAULT_AGENDA_DURATION,
         }, currentViewOptions);
 
         result.observer = this;
@@ -1374,9 +1382,7 @@ class Scheduler extends Widget {
             return result;
         };
 
-        if(this.option('toolbar')) {
-            result.items = this.option('toolbar');
-        }
+        result.items = this.option('toolbar');
 
         return result;
     }

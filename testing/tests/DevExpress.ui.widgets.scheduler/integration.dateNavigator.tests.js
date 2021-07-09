@@ -4,7 +4,6 @@ import 'ui/scheduler/ui.scheduler';
 import { getAppointmentDataProvider } from 'ui/scheduler/instanceFactory';
 
 import 'generic_light.css!';
-import dxPopup from 'ui/popup';
 import { createWrapper } from '../../helpers/scheduler/helpers.js';
 
 QUnit.testStart(function() {
@@ -432,7 +431,6 @@ QUnit.module('Integration: Date navigator', moduleConfig, function() {
         assert.equal($caption.text(), 'Jun-Jul 2018', 'Caption is correct');
     });
 
-    // TODO
     QUnit.test('Calendar should be able to scroll content(T882633)', function(assert) {
         const scheduler = createWrapper();
         const { navigator } = scheduler.header;

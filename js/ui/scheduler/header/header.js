@@ -25,34 +25,12 @@ import {
 
 const COMPONENT_CLASS = 'dx-scheduler-header';
 
-const DEFAULT_AGENDA_DURATION = 7;
-
-const SUNDAY_INDEX = 0;
-
 const DEFAULT_ELEMENT = 'defaultElement';
 
 
 export class SchedulerToolbar extends Widget {
     _getDefaultOptions() {
         return extend(super._getDefaultOptions(), {
-            items: [
-                {
-                    location: 'before',
-                    defaultElement: 'dateNavigator',
-                },
-                {
-                    location: 'after',
-                    defaultElement: 'viewSwitcher',
-                }
-            ],
-            date: new Date(),
-            currentDate: new Date(),
-            currentView: 'day',
-            views: [],
-            firstDayOfWeek: SUNDAY_INDEX,
-            intervalCount: 1,
-            useDropDownViewSwitcher: false,
-            agendaDuration: 7,
             _useShortDateFormat: !devices.real().generic || devices.isSimulator(),
         });
     }
@@ -69,19 +47,19 @@ export class SchedulerToolbar extends Widget {
             },
             {
                 key: 'currentDate',
-                value: [this._updateCalendarOption('currentDate')],
+                value: [this._getCalendarDateUpdater()],
             },
             {
                 key: 'displayedDate',
-                value: [this._updateCalendarOption('displayedDate')],
+                value: [this._getCalendarDateUpdater()],
             },
             {
                 key: 'min',
-                value: [this._updateCalendarOption('min')],
+                value: [this._getCalendarOptionUpdater('min')],
             },
             {
                 key: 'max',
-                value: [this._updateCalendarOption('max')],
+                value: [this._getCalendarOptionUpdater('max')],
             },
             {
                 key: 'tabIndex',
@@ -117,7 +95,7 @@ export class SchedulerToolbar extends Widget {
 
         const events = this.eventMap.get(name);
         if(Array.isArray(events)) {
-            events.forEach(function(event) {
+            events.forEach((event) => {
                 event.call(this, value);
             }, this);
         }
@@ -191,10 +169,18 @@ export class SchedulerToolbar extends Widget {
         }
     }
 
+    _updateCurrentDate(date) {
+        this.notifyObserver('currentDateUpdated', date);
+
+        const events = this.eventMap.get('currentDate');
+        if(Array.isArray(events)) {
+            events.forEach(event => event(date));
+        }
+    }
+
     _renderCalendar() {
         this._calendar = this._createComponent('<div>', SchedulerCalendar, {
-            displayedDate: this.option('displayedDate'),
-            currentDate: this.option('currentDate'),
+            date: this.date,
             min: this.option('min'),
             max: this.option('max'),
             firstDayOfWeek: this.option('firstDayOfWeek'),
@@ -202,7 +188,7 @@ export class SchedulerToolbar extends Widget {
             tabIndex: this.option('tabIndex'),
             onValueChanged: (e) => {
                 const date = e.value;
-                this.notifyObserver('currentDateUpdated', date);
+                this._updateCurrentDate(date);
 
                 this._calendar.hide();
             },
@@ -211,10 +197,20 @@ export class SchedulerToolbar extends Widget {
         this._calendar.$element().appendTo(this.$element());
     }
 
-    _updateCalendarOption(name) {
+    _getCalendarOptionUpdater(name) {
         return value => {
             if(this._calendar) {
                 this._calendar.option(name, value);
+            }
+        };
+    }
+
+    _getCalendarDateUpdater() {
+        return () => {
+            if(this._calendar) {
+                const date = this.date;
+
+                this._calendar.option('date', date);
             }
         };
     }
@@ -234,10 +230,10 @@ export class SchedulerToolbar extends Widget {
         return getCaption(options, useShortDateFormat, customizationFunction);
     }
 
-    _updateCurrentDate(direction) {
-        const newDate = this._getNextDate(direction);
+    _updateDateInDirection(direction) {
+        const date = this._getNextDate(direction);
 
-        this.notifyObserver('currentDateUpdated', newDate);
+        this._updateCurrentDate(date);
     }
 
     _showCalendar(e) {
@@ -267,8 +263,8 @@ export class SchedulerToolbar extends Widget {
     get intervalOptions() {
         const step = getStep(this.option('currentView'));
         const intervalCount = this.option('intervalCount');
-        const firstDayOfWeek = this.option('firstDayOfWeek') || SUNDAY_INDEX; // TODO
-        const agendaDuration = this.option('agendaDuration') || DEFAULT_AGENDA_DURATION;
+        const firstDayOfWeek = this.option('firstDayOfWeek');
+        const agendaDuration = this.option('agendaDuration');
 
         return { step, intervalCount, firstDayOfWeek, agendaDuration };
     }

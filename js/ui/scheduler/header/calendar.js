@@ -14,7 +14,6 @@ export default class SchedulerCalendar extends Widget {
     show(target) {
         this._popover.option('target', target);
         this._popover.show();
-
         this._calendar.focus();
     }
 
@@ -82,22 +81,15 @@ export default class SchedulerCalendar extends Widget {
 
     _calendarOptions() {
         return {
-            value: this.option('displayedDate') || this.option('currentDate'),
+            value: this.option('date'),
             min: this.option('min'),
             max: this.option('max'),
             firstDayOfWeek: this.option('firstDayOfWeek'),
-            _todayDate: () => new Date(), // TODO
             focusStateEnabled: this.option('focusStateEnabled'),
             onValueChanged: this.option('onValueChanged'),
             hasFocus: () => true,
-            tabIndex: 1,
+            tabIndex: this.option('tabIndex'),
         };
-    }
-
-    // Опции важно менять для уже открытого календаря
-    // (Если календарь закрыт, то при открытии попапа он создасться заново)
-    _optionChanged(args) {
-        // const { name, value } = args;
     }
 
     _isMobileLayout() {

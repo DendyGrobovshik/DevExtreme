@@ -7,7 +7,7 @@ const VIEW_SWITCHER_CLASS = 'dx-scheduler-view-switcher';
 const VIEW_SWITCHER_DROP_DOWN_BUTTON_CLASS = 'dx-scheduler-view-switcher-dropdown-button';
 
 
-export function getViewSwitcher(header, item) {
+export const getViewSwitcher = (header, item) => {
     const selectedView = getViewName(header.currentView);
 
     let items = formatViews(header.views);
@@ -44,10 +44,10 @@ export function getViewSwitcher(header, item) {
             }
         },
     };
-}
+};
 
 
-export function getDropDownViewSwitcher(header, item) {
+export const getDropDownViewSwitcher = (header, item) => {
     const selectedView = getViewName(header.currentView);
 
     const items = formatViews(header.views);
@@ -81,4 +81,4 @@ export function getDropDownViewSwitcher(header, item) {
             }
         },
     };
-}
+};
