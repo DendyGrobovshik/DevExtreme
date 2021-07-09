@@ -433,8 +433,9 @@ $material-scheduler-agenda-time-panel-cell-padding: 8px;
       }
     }
 
+    // TODO при useDropDownViewSwitcher стили должны применяться не только в материальной теме
     .dx-scheduler-view-switcher {
-      padding-right: 10px;
+      // padding-right: 10px;
 
       .dx-dropdownbutton {
         background-color: rgba(0, 0, 0, 0.05);

@@ -1,6 +1,7 @@
 import { extend } from '../../../core/utils/extend';
 import registerComponent from '../../../core/component_registrator';
 import errors from '../../../core/errors';
+import devices from '../../../core/devices';
 
 import Widget from '../../widget/ui.widget';
 import Toolbar from '../../toolbar';
@@ -34,7 +35,16 @@ const DEFAULT_ELEMENT = 'defaultElement';
 export class SchedulerToolbar extends Widget {
     _getDefaultOptions() {
         return extend(super._getDefaultOptions(), {
-            items: [], // Нужен ли здесь дефолт? Или он должен задаваться шедулером?
+            items: [
+                {
+                    location: 'before',
+                    defaultElement: 'dateNavigator',
+                },
+                {
+                    location: 'after',
+                    defaultElement: 'viewSwitcher',
+                }
+            ],
             date: new Date(),
             currentDate: new Date(),
             currentView: 'day',
@@ -42,9 +52,8 @@ export class SchedulerToolbar extends Widget {
             firstDayOfWeek: SUNDAY_INDEX,
             intervalCount: 1,
             useDropDownViewSwitcher: false,
-            isAdaptive: false,
             agendaDuration: 7,
-            _useShortDateFormat: false,
+            _useShortDateFormat: !devices.real().generic || devices.isSimulator(),
         });
     }
 
@@ -52,7 +61,7 @@ export class SchedulerToolbar extends Widget {
         const config = [
             {
                 key: 'items',
-                value: [this._render],
+                value: [this.repaint],
             },
             {
                 key: 'views',
@@ -76,15 +85,15 @@ export class SchedulerToolbar extends Widget {
             },
             {
                 key: 'tabIndex',
-                value: [this._updateCalendarOption('tabIndex')],
+                value: [this.repaint],
             },
             {
                 key: 'focusStateEnabled',
-                value: [this._updateCalendarOption('focusStateEnabled')],
+                value: [this.repaint],
             },
             {
                 key: 'useDropDownViewSwitcher',
-                value: [this._render],
+                value: [this.repaint],
             },
         ];
 
@@ -108,7 +117,9 @@ export class SchedulerToolbar extends Widget {
 
         const events = this.eventMap.get(name);
         if(Array.isArray(events)) {
-            events.forEach(event => event(value));
+            events.forEach(function(event) {
+                event.call(this, value);
+            }, this);
         }
     }
 
@@ -122,20 +133,15 @@ export class SchedulerToolbar extends Widget {
 
         this._createEventMap();
 
-        this._renderToolbar(this.$element());
-
-        this._renderCalendar(this.$element()); // TODO
+        this._renderToolbar();
     }
 
-    _renderToolbar($element) {
+    _renderToolbar() {
         const config = this._createToolbarConfig();
 
-        if(!this._toolbar) {
-            this._toolbar = this._createComponent($element, Toolbar, config);
-        } else {
-            this._toolbar.option('items', config.items);
-        }
+        this._toolbar = this._createComponent('<div>', Toolbar, config);
 
+        this._toolbar.$element().appendTo(this.$element());
     }
 
     _createToolbarConfig() {
@@ -164,6 +170,8 @@ export class SchedulerToolbar extends Widget {
 
                     return getViewSwitcher(this, item);
                 case 'dateNavigator':
+                    this._renderCalendar();
+
                     return getDateNavigator(this, item);
                 default:
                     errors.log(`Unknown default element type: ${defaultElementType}`);
@@ -175,7 +183,7 @@ export class SchedulerToolbar extends Widget {
     }
 
     _updateCurrentView(view) {
-        this._notifyObserver('currentViewUpdated', view);
+        this.notifyObserver('currentViewUpdated', view.name);
 
         const events = this.eventMap.get('currentView');
         if(Array.isArray(events)) {
@@ -183,9 +191,10 @@ export class SchedulerToolbar extends Widget {
         }
     }
 
-    _renderCalendar($element) {
+    _renderCalendar() {
         this._calendar = this._createComponent('<div>', SchedulerCalendar, {
-            currentDate: this.option('displayedDate') || this.option('currentDate'), // TODO _updateCalendarOption меняет опции как отдельные
+            displayedDate: this.option('displayedDate'),
+            currentDate: this.option('currentDate'),
             min: this.option('min'),
             max: this.option('max'),
             firstDayOfWeek: this.option('firstDayOfWeek'),
@@ -193,13 +202,13 @@ export class SchedulerToolbar extends Widget {
             tabIndex: this.option('tabIndex'),
             onValueChanged: (e) => {
                 const date = e.value;
-                this._notifyObserver('currentDateUpdated', date);
+                this.notifyObserver('currentDateUpdated', date);
 
                 this._calendar.hide();
             },
         });
 
-        this._calendar.$element().appendTo($element);
+        this._calendar.$element().appendTo(this.$element());
     }
 
     _updateCalendarOption(name) {
@@ -217,7 +226,6 @@ export class SchedulerToolbar extends Widget {
         return getNextIntervalDate(options, direction);
     }
 
-    // TODO move to dateNavigator
     _getCaption(date) {
         const options = { ...this.intervalOptions, date };
         const customizationFunction = this.option('customizeDateNavigatorText');
@@ -229,7 +237,7 @@ export class SchedulerToolbar extends Widget {
     _updateCurrentDate(direction) {
         const newDate = this._getNextDate(direction);
 
-        this._notifyObserver('currentDateUpdated', newDate);
+        this.notifyObserver('currentDateUpdated', newDate);
     }
 
     _showCalendar(e) {
@@ -240,7 +248,10 @@ export class SchedulerToolbar extends Widget {
         this._calendar.hide();
     }
 
-    // TODO пропатчить текущей вьюхой
+    get currentView() {
+        return this.option('currentView');
+    }
+
     get views() {
         return this.option('views');
     }
@@ -249,7 +260,6 @@ export class SchedulerToolbar extends Widget {
         return this.option('displayedDate') || this.option('currentDate');
     }
 
-    // TODO move to dateNavigator
     get captionText() {
         return this._getCaption(this.date).text;
     }
@@ -263,7 +273,7 @@ export class SchedulerToolbar extends Widget {
         return { step, intervalCount, firstDayOfWeek, agendaDuration };
     }
 
-    _notifyObserver(subject, args) {
+    notifyObserver(subject, args) {
         const observer = this.option('observer');
         if(observer) {
             observer.fire(subject, args);

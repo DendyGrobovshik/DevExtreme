@@ -2,7 +2,7 @@ import dateUtils from '../../../core/utils/date';
 import dateLocalization from '../../../localization/date';
 import messageLocalization from '../../../localization/message';
 import { camelize } from '../../../core/utils/inflector';
-import { isFunction } from '../../../core/utils/type';
+import { isFunction, isObject } from '../../../core/utils/type';
 import errors from '../../../core/errors';
 
 const DAY_FORMAT = 'd';
@@ -336,12 +336,32 @@ const STEP_MAP = {
 const VIEWS = ['day', 'week', 'workWeek', 'month', 'timelineDay', 'timelineWeek', 'timelineWorkWeek', 'timelineMonth', 'agenda'];
 
 export const getStep = (view) => {
-    return STEP_MAP[view];
+    return STEP_MAP[getViewType(view)];
+};
+
+export const getViewType = (view) => {
+    if(isObject(view) && view.type) {
+        return view.type;
+    }
+
+    return view;
+};
+
+export const getViewName = (view) => {
+    if(isObject(view)) {
+        return view.name ? view.name : view.type;
+    }
+
+    return view;
+};
+
+export const getViewText = (view) => {
+    return view.name || messageLocalization.format('dxScheduler-switcher' + camelize(view.type || view, true));
 };
 
 export const validateViews = (views) => {
     views.forEach(view => {
-        const viewType = view?.type | view; // TODO (same in flat views)
+        const viewType = getViewType(view);
 
         if(!VIEWS.includes(viewType)) {
             errors.log('W0008', viewType);
@@ -354,17 +374,14 @@ export const isDefaultItem = (item) => {
         .call(item, DEFAULT_ELEMENT);
 };
 
-export const flatViews = (views) => {
+export const formatViews = (views) => {
     validateViews(views);
 
     return views.map(view => {
         const text = getViewText(view);
-        const type = view; // TODO (same in validateViews views) (может быть объектом)
+        const type = getViewType(view);
+        const name = getViewName(view);
 
-        return { text, type };
+        return { text, type, name };
     });
-};
-
-export const getViewText = (view) => {
-    return view.name || messageLocalization.format('dxScheduler-switcher' + camelize(view.type || view, true));
 };

@@ -574,23 +574,52 @@ $scheduler-appointment-form-label-padding: 20px;
     z-index: 1;
     width: 100%;
 
-    .dx-toolbar-items-container {
-      .dx-scheduler-navigator {
-        padding: 10px;
+    .dx-toolbar {
+      height: 100%;
+      background-color: transparent;
+
+      .dx-toolbar-items-container {
+        .dx-scheduler-navigator {
+          padding: 10px;
+
+          .dx-button {
+            &.dx-item-selected:not(.dx-state-focused) {
+              background-color: white; // TODO
+            }
+
+            // &.dx-state-focused,
+            // &.dx-item-selected.dx-state-focused.dx-state-hover {
+            //   background-color: lightgrey; // TODO
+            // }
+
+            .dx-button-content {
+              @include use-flex-center();
+            }
+          }
+
+          // Date navigator caption
+          .dx-buttongroup-wrapper :nth-child(2) {
+            width: $scheduler-navigator-caption-width;
+          }
+        }
+      }
+
+      .dx-scheduler-view-switcher {
+        .dx-scheduler-view-switcher-dropdown-button {
+          margin: 10px;
+        }
 
         .dx-button-content {
           @include use-flex-center();
         }
-
-        .dx-buttongroup-wrapper :nth-child(2) {
-          width: $scheduler-navigator-caption-width;
-        }
       }
-    }
 
-    .dx-scheduler-view-switcher {
-      .dx-button-content {
-        @include use-flex-center();
+      .dx-toolbar-menu-container {
+        padding: 9px;
+
+        .dx-icon::before {
+          content: "\f016";
+        }
       }
     }
   }

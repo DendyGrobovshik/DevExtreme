@@ -5,6 +5,11 @@ const { trimTime } = dateUtils;
 
 const DATE_NAVIGATOR_CLASS = 'dx-scheduler-navigator';
 
+const PREVIOUS_BUTTON_CLASS = 'dx-scheduler-navigator-previous';
+const CALENDAR_CAPTION_CLASS = 'dx-scheduler-navigator-caption';
+const CALENDAR_BUTTON_CLASS = 'dx-scheduler-navigator-calendar-button';
+const NEXT_BUTTON_CLASS = 'dx-scheduler-navigator-next';
+
 const DIRECTION_LEFT = -1;
 const DIRECTION_RIGHT = 1;
 
@@ -24,39 +29,39 @@ export function getDateNavigator(header, item) {
         cssClass: DATE_NAVIGATOR_CLASS,
         options: {
             items,
-            keyExpr: 'key', // TODO hack for disabling focus on first element
-            height: '35px', // Нужен для стилей
+            keyExpr: 'key',
+            height: '35px',
             stylingMode,
             onItemClick: function(e) {
                 e.itemData.clickHandler(e);
-
-                e.itemElement.removeClass('dx-item-selected dx-state-hover dx-state-focused'); // TODO задать стили для выделения кнопок навигатора
             },
         },
     };
 }
 
+// TODO выставить aria
 function previousButtonOptions(header) {
     return {
         key: 'previous',
         icon: 'chevronprev',
         clickHandler: () => header._updateCurrentDate(DIRECTION_LEFT),
 
-        focusStateEnabled: header.option('focusStateEnabled'),
-        tabIndex: header.option('tabIndex'),
-        onInitialized: (e) => {
+        elementAttr: { class: PREVIOUS_BUTTON_CLASS, ariaLabel: 'Previous period' },
+        onContentReady: (e) => {
             const previousButton = e.component;
+            previousButton.option('disabled', isPreviousButtonDisabled(header));
+
 
             header._addEvent('min', () => {
-                previousButton.option('disabled', isPreviousButtonDisabled);
+                previousButton.option('disabled', isPreviousButtonDisabled(header));
             });
 
             header._addEvent('currentDate', () => {
-                previousButton.option('disabled', isPreviousButtonDisabled);
+                previousButton.option('disabled', isPreviousButtonDisabled(header));
             });
 
             header._addEvent('displayedDate', () => {
-                previousButton.option('disabled', isPreviousButtonDisabled);
+                previousButton.option('disabled', isPreviousButtonDisabled(header));
             });
         },
     };
@@ -66,11 +71,10 @@ function calendarButtonOptions(header) {
     return {
         key: 'calendar',
         text: header.captionText,
-        clickHandler: () => header._showCalendar(header),
+        clickHandler: (e) => header._showCalendar(e),
 
-        focusStateEnabled: header.option('focusStateEnabled'),
-        tabIndex: header.option('tabIndex'),
-        onInitialized: (e) => {
+        elementAttr: { class: `${CALENDAR_CAPTION_CLASS} ${CALENDAR_BUTTON_CLASS}` },
+        onContentReady: (e) => {
             const calendarButton = e.component;
 
             header._addEvent('currentView', () => {
@@ -98,45 +102,46 @@ function nextButtonOptions(header) {
         icon: 'chevronnext',
         clickHandler: () => header._updateCurrentDate(DIRECTION_RIGHT),
 
-        focusStateEnabled: header.option('focusStateEnabled'),
-        tabIndex: header.option('tabIndex'),
-        onInitialized: (e) => {
+        elementAttr: { class: NEXT_BUTTON_CLASS },
+        onContentReady: (e) => {
             const nextButton = e.component;
 
+            nextButton.option('disabled', isNextButtonDisabled(header));
+
             header._addEvent('min', () => {
-                nextButton.option('disabled', isNextButtonDisabled);
+                nextButton.option('disabled', isNextButtonDisabled(header));
             });
 
             header._addEvent('currentDate', () => {
-                nextButton.option('disabled', isPreviousButtonDisabled);
+                nextButton.option('disabled', isNextButtonDisabled(header));
             });
 
             header._addEvent('displayedDate', () => {
-                nextButton.option('disabled', isPreviousButtonDisabled);
+                nextButton.option('disabled', isNextButtonDisabled(header));
             });
         },
     };
 }
 
-function isPreviousButtonDisabled() {
-    let min = this.option('min');
+function isPreviousButtonDisabled(header) {
+    let min = header.option('min');
 
-    const date = this.date;
-    const caption = this._getCaption(date);
+    const date = header.date;
+    const caption = header._getCaption(date);
 
     min = min ? trimTime(min) : min;
 
-    return min && !isNaN(min.getTime()) && this._getNextDate(-1, caption.endDate) < min;
+    return min && !isNaN(min.getTime()) && header._getNextDate(-1, caption.endDate) < min;
 }
 
-function isNextButtonDisabled() {
-    let max = this.option('max');
+function isNextButtonDisabled(header) {
+    let max = header.option('max');
 
-    const date = this.date;
-    const caption = this._getCaption(date);
+    const date = header.date;
+    const caption = header._getCaption(date);
 
     max = max ? trimTime(max) : max;
     max && max.setHours(23, 59, 59);
 
-    return max && !isNaN(max.getTime()) && this._getNextDate(1, caption.startDate) > max;
+    return max && !isNaN(max.getTime()) && header._getNextDate(1, caption.startDate) > max;
 }

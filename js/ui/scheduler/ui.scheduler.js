@@ -1344,6 +1344,7 @@ class Scheduler extends Widget {
         // this._header = this._createComponent($header, Header, this._headerConfig());
     }
 
+    // TODO - убрать неиспользуемые опции
     _headerConfig() {
         const currentViewOptions = this._getCurrentViewOptions();
         const countConfig = this._getViewCountConfig();
@@ -1373,7 +1374,9 @@ class Scheduler extends Widget {
             return result;
         };
 
-        result.items = this.option('toolbar');
+        if(this.option('toolbar')) {
+            result.items = this.option('toolbar');
+        }
 
         return result;
     }

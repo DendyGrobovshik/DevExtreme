@@ -31,53 +31,60 @@
 </head>
 
 <body>
-    <!-- <div id="bg"></div> -->
     <div id="scheduler"></div>
     <script>
 
         $(function () {
-            const toolbar =
-                [
-                    {
-                        location: 'before',
-                        defaultElement: 'dateNavigator',
+            const toolbar = [
+                {
+                    location: 'before',
+                    defaultElement: 'dateNavigator',
+                },
+                {
+                    location: 'before',
+                    widget: 'dxButton',
+                    options: {
+                        text: 'Today',
+                        onClick: function () {
+                            scheduler.option('currentDate', new Date());
+                        },
+                        height: '35px', // TODO
                     },
-                    {
-                        location: 'after',
-                        defaultElement: 'viewSwitcher',
-                    },
-                ];
+                },
+                {
+                    location: 'after',
+                    defaultElement: 'viewSwitcher',
+                },
+            ];
 
-                const scheduler = $("#scheduler").dxScheduler({
-                timeZone: "America/Los_Angeles",
+            const scheduler = $("#scheduler").dxScheduler({
+                // view: 'week',
+                // views: [{
+                //     type: 'week',
+                //     intervalCount: 3,
+                //     startDate: new Date(2021, 6, 5),
+                // }],
+                // currentDate: new Date(2021, 6, 7),
+
+
                 dataSource: [],
                 views: [
                     'day',
                     'week',
                     'workWeek',
                     'month',
-                    // 'timelineWeek',
-                    // 'timelineDay'
                 ],
-                currentView: "day",
+                currentView: "week",
                 min: new Date(2021, 4, 27),
                 currentDate: new Date(2021, 4, 27),
                 startDayHour: 9,
                 height: 600,
-                // toolbar: [
-                //     {
-                //         location: 'before',
-                //         widget: 'dxButton',
-                //         options: {
-                //             text: 'Today',
-                //             onClick: function () {
-                //                 scheduler.option('currentDate', new Date(2021, 4, 30));
-                //             }
-                //         }
-                //     },
-                   // ]
                 toolbar,
             }).dxScheduler('instance');
+
+            // setTimeout(() => {
+            //     scheduler.option('useDropDownViewSwitcher', true);
+            // }, 1000);
 
             // setTimeout(() => {
             //     // scheduler.option('views', ['month', 'day']);

@@ -154,22 +154,6 @@ QUnit.module('Integration: Date navigator with min and max values', moduleConfig
 });
 
 QUnit.module('Integration: Date navigator', moduleConfig, function() {
-    [false, true].forEach(value => {
-        QUnit.test(`Date navigator should be correctly work, if deferRendering property set to ${value} (T874944)`, function(assert) {
-            dxPopup.defaultOptions({
-                options: {
-                    deferRendering: value
-                }
-            });
-
-            const scheduler = createWrapper();
-
-            const { navigator } = scheduler.header;
-            navigator.caption.click();
-            assert.ok(navigator.popover.isVisible, 'Navigator popup should be visible without errors');
-        });
-    });
-
     QUnit.test('Click on the \'next\' button should update currentDate', function(assert) {
 
         this.createInstance({ currentDate: new Date(2015, 1, 9) });
@@ -397,39 +381,6 @@ QUnit.module('Integration: Date navigator', moduleConfig, function() {
         assert.deepEqual(this.instance.option('currentDate'), new Date(2017, 2, 1), 'New date is correct');
     });
 
-    QUnit.test('Caption should be updated when currentDate is changed', function(assert) {
-
-        this.createInstance({ currentDate: new Date(2015, 1, 9) });
-        this.instance.option('currentDate', new Date(2015, 1, 10));
-
-        const navigator = $(this.instance.$element()).find('.dx-scheduler-navigator').dxSchedulerNavigator('instance');
-
-        assert.deepEqual(navigator.option('date'), new Date(2015, 1, 10), 'New date is correct');
-    });
-
-    QUnit.test('Caption should be updated when currentView is changed', function(assert) {
-
-        this.createInstance({ currentDate: new Date(2015, 1, 9) });
-        this.instance.option('currentView', 'week');
-
-        const navigator = $(this.instance.$element()).find('.dx-scheduler-navigator').dxSchedulerNavigator('instance');
-
-        assert.deepEqual(navigator.option('step'), 'week', 'Navigator caption is OK');
-    });
-
-    QUnit.test('First day of week should be updated when firstDayOfWeek is changed', function(assert) {
-
-        this.createInstance({ currentDate: new Date(2015, 1, 9), firstDayOfWeek: 3 });
-
-        const navigator = $(this.instance.$element()).find('.dx-scheduler-navigator').dxSchedulerNavigator('instance');
-
-        assert.deepEqual(navigator.option('firstDayOfWeek'), 3, 'firstDayOfWeek is OK');
-
-        this.instance.option('firstDayOfWeek', 2);
-
-        assert.deepEqual(navigator.option('firstDayOfWeek'), 2, 'firstDayOfWeek is OK');
-    });
-
     QUnit.test('Tasks should be rerendered after click on next/prev button', function(assert) {
         this.createInstance({ currentDate: new Date(2015, 1, 24) });
 
@@ -463,25 +414,6 @@ QUnit.module('Integration: Date navigator', moduleConfig, function() {
         assert.roughEqual(currentPosition.top, appointmentPosition.top, 1.001, 'position is not modified');
     });
 
-    QUnit.test('Date navigator should have a correct step on the Agenda view', function(assert) {
-        this.createInstance({
-            views: ['agenda'],
-            currentView: 'agenda'
-        });
-
-        const navigator = $(this.instance.$element()).find('.dx-scheduler-navigator').dxSchedulerNavigator('instance');
-
-        assert.equal(navigator.option('step'), 'agenda', 'Step is OK');
-    });
-
-    QUnit.test('Calendar popover has dx-scheduler-navigator-calendar-popover class', function(assert) {
-        this.createInstance({});
-
-        const popover = $(this.instance.$element()).find('.dx-scheduler-navigator .dx-overlay');
-
-        assert.ok(popover.hasClass('dx-scheduler-navigator-calendar-popover'), 'Calendar popover has dx-scheduler-navigator-calendar-popover class');
-    });
-
     QUnit.test('Click on the \'next\' button should update currentDate correctly when intervalCount, month view, currentDate > 1', function(assert) {
         this.createInstance({
             currentDate: new Date(2018, 3, 21),
@@ -500,6 +432,7 @@ QUnit.module('Integration: Date navigator', moduleConfig, function() {
         assert.equal($caption.text(), 'Jun-Jul 2018', 'Caption is correct');
     });
 
+    // TODO
     QUnit.test('Calendar should be able to scroll content(T882633)', function(assert) {
         const scheduler = createWrapper();
         const { navigator } = scheduler.header;

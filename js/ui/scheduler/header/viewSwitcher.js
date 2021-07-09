@@ -1,60 +1,17 @@
 import {
-    flatViews,
+    formatViews,
+    getViewName,
 } from './utils';
 
 const VIEW_SWITCHER_CLASS = 'dx-scheduler-view-switcher';
+const VIEW_SWITCHER_DROP_DOWN_BUTTON_CLASS = 'dx-scheduler-view-switcher-dropdown-button';
 
-export function getDropDownViewSwitcher(header, item) {
-    const selectedView = header.option('currentView');
-
-    // Нужно патчить уровнем выше
-    let items = header.views;
-    if(!items.includes(selectedView)) {
-        items = [selectedView, ...items];
-    }
-
-    items = flatViews(items);
-
-    return {
-        widget: 'dxDropDownButton',
-        locateInMenu: 'never',
-        location: item.location,
-        cssClass: VIEW_SWITCHER_CLASS,
-        options: {
-            ...item,
-            items,
-            useSelectMode: true,
-            keyExpr: 'type',
-            selectedItemKey: selectedView,
-            displayExpr: 'text',
-            splitButton: true,
-            onItemClick: (e) => {
-                const view = e.itemData.type;
-
-                header._updateCurrentView(view);
-            },
-            onInitialized: (e) => {
-                const viewSwitcher = e.component;
-
-                header._addEvent('currentView', (view) => {
-                    viewSwitcher.option('selectedItemKey', view);
-                });
-            }
-        },
-    };
-}
 
 export function getViewSwitcher(header, item) {
-    const selectedView = header.option('currentView');
+    const selectedView = getViewName(header.currentView);
 
-    let items = header.views;
-    if(!items.includes(selectedView)) {
-        items = [selectedView, ...items];
-    }
+    let items = formatViews(header.views);
 
-    items = flatViews(items);
-
-    // TODO
     items = items.map(item => {
         return {
             ...item,
@@ -69,20 +26,57 @@ export function getViewSwitcher(header, item) {
         cssClass: VIEW_SWITCHER_CLASS,
         options: {
             items,
-            keyExpr: 'type',
+            keyExpr: 'name',
             selectedItemKeys: [selectedView],
             stylingMode: 'text',
             height: '54px',
             onItemClick: (e) => {
-                const view = e.itemData.type;
+                const view = e.itemData;
 
                 header._updateCurrentView(view);
             },
-            onInitialized: (e) => {
+            onContentReady: (e) => {
                 const viewSwitcher = e.component;
 
                 header._addEvent('currentView', (view) => {
-                    viewSwitcher.option('selectedItemKeys', [view]);
+                    viewSwitcher.option('selectedItemKeys', [getViewName(view)]);
+                });
+            }
+        },
+    };
+}
+
+
+export function getDropDownViewSwitcher(header, item) {
+    const selectedView = getViewName(header.currentView);
+
+    const items = formatViews(header.views);
+
+    return {
+        ...item,
+        widget: 'dxDropDownButton',
+        locateInMenu: 'never',
+        cssClass: VIEW_SWITCHER_CLASS,
+        options: {
+            items,
+            useSelectMode: true,
+            keyExpr: 'name',
+            selectedItemKey: selectedView,
+            displayExpr: 'text',
+            splitButton: true,
+            elementAttr: {
+                class: VIEW_SWITCHER_DROP_DOWN_BUTTON_CLASS,
+            },
+            onItemClick: (e) => {
+                const view = e.itemData;
+
+                header._updateCurrentView(view);
+            },
+            onContentReady: (e) => {
+                const viewSwitcher = e.component;
+
+                header._addEvent('currentView', (view) => {
+                    viewSwitcher.option('selectedItemKey', getViewName(view));
                 });
             }
         },

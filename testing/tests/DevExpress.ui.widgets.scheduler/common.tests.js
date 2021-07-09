@@ -4,6 +4,7 @@ import dataUtils from 'core/element_data';
 import { isRenderer } from 'core/utils/type';
 import CustomStore from 'data/custom_store';
 import { DataSource } from 'data/data_source/data_source';
+import 'ui/drop_down_button';
 
 import { triggerHidingEvent, triggerShownEvent } from 'events/visibility_change';
 import 'generic_light.css!';
@@ -846,17 +847,6 @@ QUnit.module('Options for Material theme in components', {
         themes.isMaterial = this.origIsMaterial;
     }
 }, () => {
-    QUnit.test('_dropDownButtonIcon option should be passed to SchedulerHeader', function(assert) {
-        const scheduler = createWrapper({
-            currentView: 'week',
-            showCurrentTimeIndicator: false
-        });
-
-        const header = scheduler.instance.getHeader();
-
-        assert.equal(header.option('_dropDownButtonIcon'), 'chevrondown', 'header has correct _dropDownButtonIcon');
-    });
-
     QUnit.test('_collectorOffset option should be passed to SchedulerAppointments depending on the view', function(assert) {
         const scheduler = createWrapper({
             currentView: 'month',

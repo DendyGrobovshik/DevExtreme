@@ -55,7 +55,10 @@ module('Mobile tooltip', moduleConfig, () => {
         const MAX_TOOLTIP_HEIGHT = 250;
         const isDesktop = devices.real().deviceType === 'desktop';
 
-        const { tooltip, appointments } = createInstance();
+        const scheduler = createInstance();
+        scheduler.drawControl();
+        debugger;
+        const { tooltip, appointments } = scheduler;
 
         assert.notOk(tooltip.isVisible(), 'On page load tooltip should be invisible');
 
