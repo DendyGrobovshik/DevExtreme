@@ -1,10 +1,11 @@
 import { getViewSwitcher, getDropDownViewSwitcher } from './view_switcher';
 import { getDateNavigator } from './date_navigator';
 
-import { ItemOptions, SchedulerToolbarItem, ItemView } from './types';
+import { ItemOptions, ItemView } from './types';
 import { ViewType } from '../types.d';
 
 import { ToolbarItem } from '../../toolbar/toolbar_props';
+import { SchedulerToolbarItem } from './props';
 import { ViewProps } from '../props';
 
 import { validateViews, getViewName, getViewText } from '../../../../ui/scheduler/header/utils';

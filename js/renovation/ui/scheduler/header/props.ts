@@ -9,3 +9,5 @@ export class SchedulerToolbarItemProps extends ToolbarItem {
   @OneWay()
   defaultElement?: 'dateNavigator' | 'viewSwitcher';
 }
+
+export type SchedulerToolbarItem = string | SchedulerToolbarItemProps;

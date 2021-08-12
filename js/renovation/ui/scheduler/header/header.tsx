@@ -22,12 +22,11 @@ import {
 import { formToolbarItem, formatViews } from './utils';
 
 import type { DateNavigatorTextInfo } from '../../../../ui/scheduler';
-import {
-  ItemOptions, Direction, ItemView, SchedulerToolbarItem,
-} from './types';
+import { ItemOptions, Direction, ItemView } from './types';
 import { ViewType } from '../types.d';
 
 import { SchedulerProps, ViewProps } from '../props';
+import { SchedulerToolbarItem } from './props';
 import { ToolbarItem } from '../../toolbar/toolbar_props';
 
 const { trimTime } = dateUtils;
