@@ -105,6 +105,7 @@ export const viewFunction = ({
         firstDayOfWeek={firstDayOfWeek}
         useDropDownViewSwitcher={useDropDownViewSwitcher}
         customizationFunction={customizeDateNavigatorText}
+        rtlEnabled={rtlEnabled}
       />
       <WorkSpace
         firstDayOfWeek={firstDayOfWeek}
@@ -256,8 +257,8 @@ export class Scheduler extends JSXComponent(SchedulerProps) {
   }
 
   onViewRendered(viewMetaData: ViewMetaData): void {
-    this.viewDataProvider = viewMetaData.viewDataProvider;
-    this.cellsMetaData = viewMetaData.cellsMetaData;
+    // this.viewDataProvider = viewMetaData.viewDataProvider;
+    // this.cellsMetaData = viewMetaData.cellsMetaData;
   }
 
   setCurrentView(view: string): void {

@@ -50,7 +50,10 @@ export const getDateNavigator = (
   updateDateByDirection: (direction: Direction) => void,
   isPreviousButtonDisabled: boolean,
   isNextButtonDisabled: boolean,
+  rtlEnabled: boolean | undefined,
 ): ToolbarItem => {
+  console.log(captionText);
+  
   const items = [
     getPreviousButtonOptions(isPreviousButtonDisabled),
     getCalendarButtonOptions(captionText),
@@ -62,6 +65,7 @@ export const getDateNavigator = (
   return {
     widget: 'dxButtonGroup',
     cssClass: DATE_NAVIGATOR_CLASS,
+    rtlEnabled,
     options: {
       items,
       stylingMode,
@@ -81,6 +85,7 @@ export const getDateNavigator = (
             break;
         }
       },
+      rtlEnabled,
     },
     ...item,
   } as ToolbarItem;

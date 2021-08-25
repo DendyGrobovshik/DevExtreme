@@ -4,6 +4,8 @@ import {
   JSXComponent,
   OneWay,
   Event,
+  Ref,
+  RefObject,
 } from '@devextreme-generator/declarations';
 
 import devices from '../../../../core/devices';
@@ -30,6 +32,7 @@ import { ViewType } from '../types.d';
 import { SchedulerProps, ViewProps } from '../props';
 import { SchedulerToolbarItem } from './props';
 import { ToolbarItem } from '../../toolbar/toolbar_props';
+import { Calendar } from '../../overlays/calendar';
 
 const { trimTime } = dateUtils;
 
@@ -37,8 +40,21 @@ export const viewFunction = (viewModel: SchedulerToolbar): JSX.Element => (
   <div
     className="dx-scheduler-header"
   >
+    <Calendar
+      date={viewModel.props.currentDate}
+      min={viewModel.props.min}
+      max={viewModel.props.max}
+      firstDayOfWeek={viewModel.props.firstDayOfWeek}
+      onValueChanged={(e) => {
+        viewModel.setCurrentDate(e.value)
+        viewModel.calendarRef.current?.hide();
+      }
+      }
+      ref={viewModel.calendarRef}
+    />
     <Toolbar
       items={viewModel.items}
+      rtlEnabled={viewModel.props.rtlEnabled}
     />
   </div>
 );
@@ -65,15 +81,16 @@ export class SchedulerToolbarBaseProps {
 
   @OneWay() useShortDateFormat = !devices.real().generic || devices.isSimulator();
 
-  @OneWay() customizationFunction?: (caption: DateNavigatorTextInfo) => string;
-}
+  @OneWay() customizationFunction?: (caption: DateNavigatorTextInfo) => string;}
 
 export type SchedulerToolbarProps = SchedulerToolbarBaseProps
-& Pick<SchedulerProps, 'currentView' | 'min' | 'max' | 'useDropDownViewSwitcher'>;
+  & Pick<SchedulerProps, 'currentView' | 'min' | 'max' | 'useDropDownViewSwitcher' | 'rtlEnabled'>;
 
 @Component({ view: viewFunction })
 export default class SchedulerToolbar extends JSXComponent<SchedulerToolbarProps, 'items' | 'views' | 'onCurrentViewUpdate' | 'currentDate' | 'onCurrentDateUpdate' | 'startViewDate'>() {
   cssClass = 'dx-scheduler-header';
+
+  @Ref() calendarRef!: RefObject<Calendar>;
 
   get step(): string {
     return getStep(this.props.currentView) as string;
@@ -98,11 +115,14 @@ export default class SchedulerToolbar extends JSXComponent<SchedulerToolbarProps
       date: this.displayedDate,
     };
 
-    return getCaption(
+    const caption = getCaption(
       options,
       this.props.useShortDateFormat,
       this.props.customizationFunction,
     ) as DateNavigatorTextInfo;
+
+    console.log(caption.text);
+    return caption;
   }
 
   get captionText(): string {
@@ -183,9 +203,14 @@ export default class SchedulerToolbar extends JSXComponent<SchedulerToolbarProps
     return nextDate > max;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   showCalendar(): void {
-    // TODO
+    console.log(this.calendarRef);
+
+    const calendar = this.calendarRef.current;
+
+    const target = document.getElementsByClassName('dx-scheduler-navigator');
+
+    calendar?.show(target[0]);
   }
 
   get items(): ToolbarItem[] {
@@ -199,6 +224,7 @@ export default class SchedulerToolbar extends JSXComponent<SchedulerToolbarProps
       updateDateByDirection: (direction) => this.updateDateByDirection(direction),
       isPreviousButtonDisabled: this.isPreviousButtonDisabled(),
       isNextButtonDisabled: this.isNextButtonDisabled(),
+      rtlEnabled: this.props.rtlEnabled,
     };
 
     return this.props.items
