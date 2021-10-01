@@ -78,6 +78,7 @@ import { ExpressionUtils } from './expressionUtils';
 import { validateDayHours } from '../../renovation/ui/scheduler/view_model/to_test/views/utils/base';
 import { renderAppointments } from './appointments/render';
 import { AgendaResourceProcessor } from './resources/agendaResourceProcessor';
+import dxrSchedulerToolbar from '../../renovation/ui/scheduler/header/header.j';
 
 // STYLE scheduler
 const MINUTES_IN_HOUR = 60;
@@ -345,7 +346,7 @@ class Scheduler extends Widget {
     _defaultOptionsRules() {
         return super._defaultOptionsRules().concat([
             {
-                device: function() {
+                device: function () {
                     return devices.real().deviceType === 'desktop' && !devices.isSimulator();
                 },
                 options: {
@@ -353,7 +354,7 @@ class Scheduler extends Widget {
                 }
             },
             {
-                device: function() {
+                device: function () {
                     return !devices.current().generic;
                 },
                 options: {
@@ -367,21 +368,21 @@ class Scheduler extends Widget {
                 }
             },
             {
-                device: function() {
+                device: function () {
                     return isMaterial();
                 },
                 options: {
                     useDropDownViewSwitcher: true,
-                    dateCellTemplate: function(data, index, element) {
+                    dateCellTemplate: function (data, index, element) {
                         const text = data.text;
 
-                        text.split(' ').forEach(function(text, index) {
+                        text.split(' ').forEach(function (text, index) {
                             const span = $('<span>')
                                 .text(text)
                                 .addClass('dx-scheduler-header-panel-cell-date');
 
                             $(element).append(span);
-                            if(!index) $(element).append(' ');
+                            if (!index) $(element).append(' ');
                         });
                     },
 
@@ -424,7 +425,7 @@ class Scheduler extends Widget {
         let value = args.value;
         const name = args.name;
 
-        switch(args.name) {
+        switch (args.name) {
             case 'customizeDateNavigatorText':
                 this._updateOption('header', name, value);
                 break;
@@ -437,8 +438,9 @@ class Scheduler extends Widget {
                 value = dateUtils.trimTime(new Date(value));
                 this.option('selectedCellData', []);
                 this._workSpace.option(name, new Date(value));
-                this._header?.option(name, new Date(value));
-                this._header?.option('startViewDate', this.getStartViewDate());
+                // this._header?.option(name, new Date(value));
+                // this._header?.option('startViewDate', this.getStartViewDate());
+                this._renderHeader();
                 this._appointments.option('items', []);
                 this._filterAppointmentsByDate();
 
@@ -463,14 +465,16 @@ class Scheduler extends Widget {
             case 'views':
                 this.modelProvider.updateCurrentView();
 
-                if(this._getCurrentViewOptions()) {
+                if (this._getCurrentViewOptions()) {
                     this.repaint();
                 } else {
-                    this._header?.option(name, value);
+                    // this._header?.option(name, value);
+                    this._renderHeader()
                 }
                 break;
             case 'useDropDownViewSwitcher':
-                this._header?.option(name, value);
+                // this._header?.option(name, value);
+                this._renderHeader()
                 break;
             case 'currentView':
                 this.modelProvider.updateCurrentView();
@@ -492,6 +496,7 @@ class Scheduler extends Widget {
                     this._filterAppointmentsByDate();
                     this._appointments.option('allowAllDayResize', value !== 'day');
                 });
+                this._renderHeader();
                 break;
             case 'appointmentTemplate':
                 this._appointments.option('itemTemplate', value);
@@ -567,7 +572,7 @@ class Scheduler extends Widget {
                 this._postponeResourceLoading().done((resources) => {
                     this._appointments.option('items', []);
                     this._refreshWorkSpace(resources);
-                    if(this._readyToRenderAppointments) {
+                    if (this._readyToRenderAppointments) {
                         this._appointments.option('items', this._getAppointmentsToRepaint());
                     }
                 });
@@ -575,7 +580,7 @@ class Scheduler extends Widget {
             case 'cellDuration':
                 this._validateCellDuration();
                 this._appointments.option('items', []);
-                if(this._readyToRenderAppointments) {
+                if (this._readyToRenderAppointments) {
                     this._updateOption('workSpace', 'hoursInterval', value / 60);
                     this._appointments.option('items', this._getAppointmentsToRepaint());
                 }
@@ -590,7 +595,7 @@ class Scheduler extends Widget {
             case 'width':
                 // TODO: replace with css
                 this._updateOption('header', name, value);
-                if(this.option('crossScrollingEnabled')) {
+                if (this.option('crossScrollingEnabled')) {
                     this._updateOption('workSpace', 'width', value);
                 }
                 this._updateOption('workSpace', 'schedulerWidth', value);
@@ -684,9 +689,10 @@ class Scheduler extends Widget {
                 this._workSpace.option('draggingMode', value);
                 break;
             case 'toolbar':
-                this._header
-                    ? this._header.option('items', value)
-                    : this.repaint();
+                // this._header
+                //     ? this._header.option('items', value)
+                //     : this.repaint();
+                this._renderHeader();
                 break;
             case 'loadedResources':
             case 'resourceLoaderMap':
@@ -719,11 +725,11 @@ class Scheduler extends Widget {
     _getSerializationFormat(optionName) {
         const value = this._getCurrentViewOption(optionName);
 
-        if(typeof value === 'number') {
+        if (typeof value === 'number') {
             return 'number';
         }
 
-        if(!isString(value)) {
+        if (!isString(value)) {
             return;
         }
 
@@ -735,7 +741,7 @@ class Scheduler extends Widget {
             allowDelete: editing.allowUpdating && editing.allowDeleting
         };
 
-        if(!this._isAgenda()) {
+        if (!this._isAgenda()) {
             editingConfig.allowDrag = editing.allowDragging;
             editingConfig.allowResize = editing.allowResizing;
             editingConfig.allowAllDayResize = editing.allowResizing && this._supportAllDayResizing();
@@ -786,13 +792,13 @@ class Scheduler extends Widget {
     _reloadDataSource() {
         const result = new Deferred();
 
-        if(this._dataSource) {
+        if (this._dataSource) {
 
-            this._dataSource.load().done((function() {
+            this._dataSource.load().done((function () {
                 hideLoading();
 
                 this._fireContentReadyAction(result);
-            }).bind(this)).fail(function() {
+            }).bind(this)).fail(function () {
                 hideLoading();
                 result.reject();
             });
@@ -817,7 +823,7 @@ class Scheduler extends Widget {
             result?.resolve();
         };
 
-        if(this._workSpaceRecalculation) {
+        if (this._workSpaceRecalculation) {
             this._workSpaceRecalculation?.done(() => {
                 fireContentReady();
             });
@@ -831,7 +837,7 @@ class Scheduler extends Widget {
 
         this._toggleSmallClass();
 
-        if(!this._isAgenda() && filteredItems && this._isVisible()) {
+        if (!this._isAgenda() && filteredItems && this._isVisible()) {
             this._workSpace.option('allDayExpanded', this._isAllDayExpanded(filteredItems));
             this._workSpace._dimensionChanged();
 
@@ -911,7 +917,7 @@ class Scheduler extends Widget {
     updateFactoryInstances() {
         const model = this._options._optionManager._options;
 
-        if(!isDefined(this.key)) {
+        if (!isDefined(this.key)) {
             this.key = generateKey();
             createModelProvider(this.key, model);
         }
@@ -952,7 +958,7 @@ class Scheduler extends Widget {
         const getDate = getter => {
             return (data) => {
                 const value = getter(data);
-                if(value instanceof Date) {
+                if (value instanceof Date) {
                     return value.valueOf();
                 }
                 return value;
@@ -973,14 +979,14 @@ class Scheduler extends Widget {
                     'startDateTimeZone',
                     'endDateTimeZone'
                 ], this.option('integrationOptions.watchMethod'), {
-                    'text': createGetter(expr.textExpr),
-                    'startDate': getDate(createGetter(expr.startDateExpr)),
-                    'endDate': getDate(createGetter(expr.endDateExpr)),
-                    'startDateTimeZone': createGetter(expr.startDateTimeZoneExpr),
-                    'endDateTimeZone': createGetter(expr.endDateTimeZoneExpr),
-                    'allDay': createGetter(expr.allDayExpr),
-                    'recurrenceRule': createGetter(expr.recurrenceRuleExpr)
-                })
+                'text': createGetter(expr.textExpr),
+                'startDate': getDate(createGetter(expr.startDateExpr)),
+                'endDate': getDate(createGetter(expr.endDateExpr)),
+                'startDateTimeZone': createGetter(expr.startDateTimeZoneExpr),
+                'endDateTimeZone': createGetter(expr.endDateTimeZoneExpr),
+                'allDay': createGetter(expr.allDayExpr),
+                'recurrenceRule': createGetter(expr.recurrenceRuleExpr)
+            })
         });
     }
 
@@ -989,8 +995,8 @@ class Scheduler extends Widget {
     }
 
     _dataSourceChangedHandler(result) {
-        if(this._readyToRenderAppointments) {
-            this._workSpaceRecalculation.done((function() {
+        if (this._readyToRenderAppointments) {
+            this._workSpaceRecalculation.done((function () {
 
                 this._renderAppointments();
 
@@ -1005,7 +1011,7 @@ class Scheduler extends Widget {
     isVirtualScrolling() {
         const workspace = this.getWorkSpace();
 
-        if(workspace) {
+        if (workspace) {
             return workspace.isVirtualScrolling();
         }
 
@@ -1033,11 +1039,11 @@ class Scheduler extends Widget {
         );
 
         let viewModel = [];
-        if(this._isVisible()) {
+        if (this._isVisible()) {
             viewModel = this._getAppointmentsToRepaint();
         }
 
-        if(this.modelProvider.isRenovatedAppointments) {
+        if (this.modelProvider.isRenovatedAppointments) {
             renderAppointments({
                 instance: this,
                 $dateTable: this.getWorkSpace()._getDateTable(),
@@ -1055,7 +1061,7 @@ class Scheduler extends Widget {
         const layoutManager = this.getLayoutManager();
 
         const appointmentsMap = layoutManager.createAppointmentsMap(filteredItems);
-        if(this.modelProvider.isRenovatedAppointments) {
+        if (this.modelProvider.isRenovatedAppointments) {
             const appointmentTemplate = this.option('appointmentTemplate') !== DEFAULT_APPOINTMENT_TEMPLATE_NAME
                 ? this.option('appointmentTemplate')
                 : undefined;
@@ -1104,7 +1110,7 @@ class Scheduler extends Widget {
             allowDragging: !!editing
         };
 
-        if(isObject(editing)) {
+        if (isObject(editing)) {
             this._editing = extend(this._editing, editing);
         }
 
@@ -1118,8 +1124,8 @@ class Scheduler extends Widget {
         let result = true;
         const editing = this._editing;
 
-        for(const prop in editing) {
-            if(Object.prototype.hasOwnProperty.call(editing, prop)) {
+        for (const prop in editing) {
+            if (Object.prototype.hasOwnProperty.call(editing, prop)) {
                 result = result && !editing[prop];
             }
         }
@@ -1187,7 +1193,7 @@ class Scheduler extends Widget {
         this._appointmentForm = this.createAppointmentForm();
         this._appointmentPopup = this.createAppointmentPopup(this._appointmentForm);
 
-        if(this._isDataSourceLoaded() || this._isDataSourceLoading()) {
+        if (this._isDataSourceLoaded() || this._isDataSourceLoading()) {
             this._initMarkupCore(this.option('loadedResources'));
             this._dataSourceChangedHandler(this._dataSource.items());
             this._fireContentReadyAction();
@@ -1329,15 +1335,26 @@ class Scheduler extends Widget {
     }
 
     _renderHeader() {
-        if(this.option('toolbar').length !== 0) {
+        console.log('Render header');
+        if (this.option('toolbar').length !== 0) {
             const $header = $('<div>').appendTo(this._mainContainer);
-            this._header = this._createComponent($header, SchedulerHeader, this._headerConfig());
+            // this._header = this._createComponent($header, SchedulerHeader, this._headerConfig());
+            // this._header = this._createComponent($header, SchedulerHeader, this._headerConfig());
+            utils.renovation.renderComponent(
+                this,
+                $header,
+                dxrSchedulerToolbar,
+                'renovatedSchedulerToolbar',
+                this._headerConfig(),
+            );
         }
     }
 
     _headerConfig() {
         const currentViewOptions = this._getCurrentViewOptions();
         const countConfig = this._getViewCountConfig();
+
+        // console.log('Model provider current view', this.modelProvider.currentView);
 
         const result = extend({
             firstDayOfWeek: this.getFirstDayOfWeek(),
@@ -1356,14 +1373,22 @@ class Scheduler extends Widget {
         result.min = new Date(this._dateOption('min'));
         result.max = new Date(this._dateOption('max'));
         result.currentDate = dateUtils.trimTime(new Date(this._dateOption('currentDate')));
-        result.onCurrentViewChange = (name) => this.option('currentView', name);
-        result.onCurrentDateChange = (date) => this.option('currentDate', date);
+        result.onCurrentViewUpdate = (name) => {
+            console.log('Current view', name.actionValue);
+            this.option('currentView', name.actionValue);
+        }
+        result.onCurrentDateUpdate = (date) => {
+            console.log('Current date', date.actionValue);
+            this.option('currentDate', date.actionValue);
+        }
         result.items = this.option('toolbar');
 
         result.todayDate = () => {
             const result = getTimeZoneCalculator(this.key).createDate(new Date(), { path: 'toGrid' });
             return result;
         };
+
+        result.startViewDate = this?.getStartViewDate() || result.currentDate;
 
         return result;
     }
@@ -1402,7 +1427,7 @@ class Scheduler extends Widget {
     }
 
     getCollectorOffset() {
-        if(this._workSpace.needApplyCollectorOffset() && !this.option('adaptivityEnabled')) {
+        if (this._workSpace.needApplyCollectorOffset() && !this.option('adaptivityEnabled')) {
             return this.option('_collectorOffset');
         } else {
             return 0;
@@ -1418,7 +1443,7 @@ class Scheduler extends Widget {
         const startDayHour = this._getCurrentViewOption('startDayHour');
         const cellDuration = this._getCurrentViewOption('cellDuration');
 
-        if((endDayHour - startDayHour) * MINUTES_IN_HOUR % cellDuration !== 0) {
+        if ((endDayHour - startDayHour) * MINUTES_IN_HOUR % cellDuration !== 0) {
             errors.log('W1015');
         }
     }
@@ -1442,7 +1467,8 @@ class Scheduler extends Widget {
         this._workSpace.getWorkArea().append(this._appointments.$element());
 
         this._recalculateWorkspace();
-        countConfig.startDate && this._header?.option('currentDate', this._workSpace._getHeaderDate());
+        // countConfig.startDate && this._header?.option('currentDate', this._workSpace._getHeaderDate());
+        countConfig.startDate && this._header && this._renderHeader();
 
         this._appointments.option('_collectorOffset', this.getCollectorOffset());
     }
@@ -1463,8 +1489,8 @@ class Scheduler extends Widget {
     _getViewByName(name) {
         const views = this.option('views');
 
-        for(let i = 0; i < views.length; i++) {
-            if(views[i].name === name || views[i].type === name || views[i] === name) return views[i];
+        for (let i = 0; i < views.length; i++) {
+            if (views[i].name === name || views[i].type === name || views[i] === name) return views[i];
         }
     }
 
@@ -1559,7 +1585,7 @@ class Scheduler extends Widget {
     }
 
     _waitAsyncTemplate(callback) {
-        if(this._options.silent('templatesRenderAsynchronously')) {
+        if (this._options.silent('templatesRenderAsynchronously')) {
             const timer = setTimeout(() => {
                 callback();
                 clearTimeout(timer);
@@ -1581,7 +1607,7 @@ class Scheduler extends Widget {
     _getAppointmentTemplate(optionName) {
         const currentViewOptions = this._getCurrentViewOptions();
 
-        if(currentViewOptions && currentViewOptions[optionName]) {
+        if (currentViewOptions && currentViewOptions[optionName]) {
             return this._getTemplate(currentViewOptions[optionName]);
         }
 
@@ -1591,7 +1617,7 @@ class Scheduler extends Widget {
     _updateOption(viewName, optionName, value) {
         const currentViewOptions = this._getCurrentViewOptions();
 
-        if(!currentViewOptions || !isDefined(currentViewOptions[optionName])) {
+        if (!currentViewOptions || !isDefined(currentViewOptions[optionName])) {
             this['_' + viewName].option(optionName, value);
         }
     }
@@ -1603,7 +1629,7 @@ class Scheduler extends Widget {
 
         this._renderWorkSpace(groups);
 
-        if(this._readyToRenderAppointments) {
+        if (this._readyToRenderAppointments) {
             this._appointments.option({
                 fixedContainer: this._workSpace.getFixedContainer(),
                 allDayContainer: this._workSpace.getAllDayContainer()
@@ -1643,13 +1669,13 @@ class Scheduler extends Widget {
     _checkRecurringAppointment(targetAppointment, singleAppointment, exceptionDate, callback, isDeleted, isPopupEditing, dragEvent) {
         const recurrenceRule = ExpressionUtils.getField(this.key, 'recurrenceRule', targetAppointment);
 
-        if(!getRecurrenceProcessor().evalRecurrenceRule(recurrenceRule).isValid || !this._editing.allowUpdating) {
+        if (!getRecurrenceProcessor().evalRecurrenceRule(recurrenceRule).isValid || !this._editing.allowUpdating) {
             callback();
             return;
         }
 
         const editMode = this.option('recurrenceEditMode');
-        switch(editMode) {
+        switch (editMode) {
             case 'series':
                 callback();
                 break;
@@ -1657,7 +1683,7 @@ class Scheduler extends Widget {
                 this._excludeAppointmentFromSeries(targetAppointment, singleAppointment, exceptionDate, isDeleted, isPopupEditing, dragEvent);
                 break;
             default:
-                if(dragEvent) {
+                if (dragEvent) {
                     dragEvent.cancel = new Deferred();
                 }
                 this._showRecurrenceChangeConfirm(isDeleted)
@@ -1685,11 +1711,11 @@ class Scheduler extends Widget {
         delete singleRawAppointment[keyPropertyName];
 
         const canCreateNewAppointment = !isDeleted && !isPopupEditing;
-        if(canCreateNewAppointment) {
+        if (canCreateNewAppointment) {
             this.addAppointment(singleRawAppointment);
         }
 
-        if(isPopupEditing) {
+        if (isPopupEditing) {
             this._appointmentPopup.show(singleRawAppointment, {
                 isToolbarVisible: true,
                 action: ACTION_TO_APPOINTMENT.EXCLUDE_FROM_SERIES,
@@ -1709,7 +1735,7 @@ class Scheduler extends Widget {
     _createRecurrenceException(appointment, exceptionDate) {
         const result = [];
 
-        if(appointment.recurrenceException) {
+        if (appointment.recurrenceException) {
             result.push(appointment.recurrenceException);
         }
         result.push(this._getSerializedDate(exceptionDate, appointment.startDate, appointment.allDay));
@@ -1736,8 +1762,8 @@ class Scheduler extends Widget {
             showCloseButton: true,
             showTitle: true,
             buttons: [
-                { text: seriesText, onClick: function() { return RECURRENCE_EDITING_MODE.SERIES; } },
-                { text: occurrenceText, onClick: function() { return RECURRENCE_EDITING_MODE.OCCURENCE; } }
+                { text: seriesText, onClick: function () { return RECURRENCE_EDITING_MODE.SERIES; } },
+                { text: occurrenceText, onClick: function () { return RECURRENCE_EDITING_MODE.OCCURENCE; } }
             ],
             popupOptions: {
                 onHidden: (e) => {
@@ -1769,11 +1795,11 @@ class Scheduler extends Widget {
         let appointmentEndDate = new Date(appointment.endDate);
         let resultedStartDate = cellStartDate || appointmentStartDate;
 
-        if(!isValidDate(appointmentStartDate)) {
+        if (!isValidDate(appointmentStartDate)) {
             appointmentStartDate = resultedStartDate;
         }
 
-        if(!isValidDate(appointmentEndDate)) {
+        if (!isValidDate(appointmentEndDate)) {
             appointmentEndDate = cellEndDate;
         }
 
@@ -1783,7 +1809,7 @@ class Scheduler extends Widget {
             && isValidDate(appointment.startDate)
             && isValidDate(cellStartDate);
 
-        if(isKeepAppointmentHours) {
+        if (isKeepAppointmentHours) {
             const { trimTime } = dateUtils;
 
             const startDate = timeZoneCalculator.createDate(appointment.startDate, { path: 'toGrid' });
@@ -1794,24 +1820,24 @@ class Scheduler extends Widget {
         }
 
         const result = createAppointmentAdapter(this.key, {});
-        if(targetCell.allDay !== undefined) {
+        if (targetCell.allDay !== undefined) {
             result.allDay = targetCell.allDay;
         }
         result.startDate = resultedStartDate;
 
         let resultedEndDate = new Date(resultedStartDate.getTime() + duration);
 
-        if(this.appointmentTakesAllDay(rawAppointment) && !result.allDay && this._workSpace.supportAllDayRow()) {
+        if (this.appointmentTakesAllDay(rawAppointment) && !result.allDay && this._workSpace.supportAllDayRow()) {
             resultedEndDate = this._workSpace.calculateEndDate(resultedStartDate);
         }
 
-        if(appointment.allDay && !this._workSpace.supportAllDayRow() && !this._workSpace.keepOriginalHours()) {
+        if (appointment.allDay && !this._workSpace.supportAllDayRow() && !this._workSpace.keepOriginalHours()) {
             const dateCopy = new Date(resultedStartDate);
             dateCopy.setHours(0);
 
             resultedEndDate = new Date(dateCopy.getTime() + duration);
 
-            if(resultedEndDate.getHours() !== 0) {
+            if (resultedEndDate.getHours() !== 0) {
                 resultedEndDate.setHours(this._getCurrentViewOption('endDayHour'));
             }
         }
@@ -1835,20 +1861,20 @@ class Scheduler extends Widget {
         const adapter = createAppointmentAdapter(this.key, appointment);
         const targetedAdapter = adapter.clone();
 
-        if(this._isAgenda() && adapter.isRecurrent) {
+        if (this._isAgenda() && adapter.isRecurrent) {
             const getStartDate = this.getRenderingStrategyInstance().getAppointmentDataCalculator();
             const newStartDate = getStartDate($(element), adapter.startDate).startDate;
 
             targetedAdapter.startDate = newStartDate;
             targetedAdapter.endDate = new Date(newStartDate.getTime() + adapter.duration);
 
-        } else if(settings) {
+        } else if (settings) {
             targetedAdapter.startDate = info ? info.sourceAppointment.startDate : adapter.startDate; // TODO: in agenda we havn't info field
             targetedAdapter.endDate = info ? info.sourceAppointment.endDate : adapter.endDate;
         }
 
         const rawTargetedAppointment = targetedAdapter.source();
-        if(element) {
+        if (element) {
             this.setTargetedAppointmentResources(rawTargetedAppointment, element, appointmentIndex);
         }
 
@@ -1863,7 +1889,7 @@ class Scheduler extends Widget {
         const callback = this._subscribes[subject];
         const args = Array.prototype.slice.call(arguments);
 
-        if(!isFunction(callback)) {
+        if (!isFunction(callback)) {
             throw errors.Error('E1031', subject);
         }
 
@@ -1881,26 +1907,26 @@ class Scheduler extends Widget {
             cancel: false
         };
 
-        const performFailAction = function(err) {
-            if(onUpdatePrevented) {
+        const performFailAction = function (err) {
+            if (onUpdatePrevented) {
                 onUpdatePrevented.call(this);
             }
 
-            if(err && err.name === 'Error') {
+            if (err && err.name === 'Error') {
                 throw err;
             }
         }.bind(this);
 
         this._actions[StoreEventNames.UPDATING](updatingOptions);
 
-        if(dragEvent && !isDeferred(dragEvent.cancel)) {
+        if (dragEvent && !isDeferred(dragEvent.cancel)) {
             dragEvent.cancel = new Deferred();
         }
 
-        return this._processActionResult(updatingOptions, function(canceled) {
+        return this._processActionResult(updatingOptions, function (canceled) {
             let deferred = new Deferred();
 
-            if(!canceled) {
+            if (!canceled) {
                 this._expandAllDayPanel(rawAppointment);
 
                 try {
@@ -1911,7 +1937,7 @@ class Scheduler extends Widget {
                         })
                         .always(storeAppointment => this._onDataPromiseCompleted(StoreEventNames.UPDATED, storeAppointment))
                         .fail(() => performFailAction());
-                } catch(err) {
+                } catch (err) {
                     performFailAction(err);
                     deferred.resolve();
                 }
@@ -1931,9 +1957,9 @@ class Scheduler extends Widget {
                 .always(deferred.resolve);
         };
 
-        if(isPromise(actionOptions.cancel)) {
+        if (isPromise(actionOptions.cancel)) {
             when(fromPromise(actionOptions.cancel)).always((cancel) => {
-                if(!isDefined(cancel)) {
+                if (!isDefined(cancel)) {
                     cancel = actionOptions.cancel.state() === 'rejected';
                 }
                 resolveCallback(callback.call(this, cancel));
@@ -1946,7 +1972,7 @@ class Scheduler extends Widget {
     }
 
     _expandAllDayPanel(appointment) {
-        if(!this._isAllDayExpanded(getAppointmentDataProvider(this.key).filteredItems) && this.appointmentTakesAllDay(appointment)) {
+        if (!this._isAllDayExpanded(getAppointmentDataProvider(this.key).filteredItems) && this.appointmentTakesAllDay(appointment)) {
             this._workSpace.option('allDayExpanded', true);
         }
     }
@@ -1954,7 +1980,7 @@ class Scheduler extends Widget {
     _onDataPromiseCompleted(handlerName, storeAppointment, appointment) {
         const args = { appointmentData: appointment || storeAppointment };
 
-        if(storeAppointment instanceof Error) {
+        if (storeAppointment instanceof Error) {
             args.error = storeAppointment;
         } else {
             this._appointmentPopup.visible && this._appointmentPopup.hide();
@@ -2007,11 +2033,11 @@ class Scheduler extends Widget {
         startDate = getConvertedToTimeZone(startDate);
         endDate = getConvertedToTimeZone(endDate);
 
-        if(day.getTime() === endDate.getTime()) {
+        if (day.getTime() === endDate.getTime()) {
             return startDate.getTime() === endDate.getTime();
         }
 
-        if(trimTime) {
+        if (trimTime) {
             day = dateUtils.trimTime(day);
             startDate = dateUtils.trimTime(startDate);
             endDate = dateUtils.trimTime(endDate);
@@ -2030,14 +2056,14 @@ class Scheduler extends Widget {
     setTargetedAppointmentResources(rawAppointment, element, appointmentIndex) {
         const groups = this._getCurrentViewOption('groups');
 
-        if(groups?.length) {
+        if (groups?.length) {
             const resourcesSetter = this.getResourceDataAccessors().setter;
             const workSpace = this._workSpace;
             let getGroups;
             let setResourceCallback;
 
-            if(this._isAgenda()) {
-                getGroups = function() {
+            if (this._isAgenda()) {
+                getGroups = function () {
                     const apptSettings = this.getLayoutManager()._positionMap[appointmentIndex];
 
                     return getCellGroups(
@@ -2046,17 +2072,17 @@ class Scheduler extends Widget {
                     );
                 };
 
-                setResourceCallback = function(_, group) {
+                setResourceCallback = function (_, group) {
                     resourcesSetter[group.name](rawAppointment, group.id);
                 };
             } else {
-                getGroups = function() {
+                getGroups = function () {
                     // TODO: in the future, necessary refactor the engine of determining groups
                     const setting = utils.dataAccessors.getAppointmentSettings(element) || {};
                     return workSpace.getCellDataByCoordinates({ left: setting.left, top: setting.top }).groups;
                 };
 
-                setResourceCallback = function(field, value) {
+                setResourceCallback = function (field, value) {
                     resourcesSetter[field](rawAppointment, value);
                 };
             }
@@ -2066,7 +2092,7 @@ class Scheduler extends Widget {
     }
 
     getStartViewDate() {
-        return this._workSpace.getStartViewDate();
+        return this?._workSpace?.getStartViewDate();
     }
 
     getEndViewDate() {
@@ -2092,11 +2118,11 @@ class Scheduler extends Widget {
 
         const isCreateAppointment = createNewAppointment ?? isEmptyObject(rawAppointment);
 
-        if(isEmptyObject(rawAppointment)) {
+        if (isEmptyObject(rawAppointment)) {
             rawAppointment = this.createPopupAppointment();
         }
 
-        if(isCreateAppointment) {
+        if (isCreateAppointment) {
             delete this._editAppointmentData; // TODO
             this._editing.allowAdding && this._appointmentPopup.show(rawAppointment, {
                 isToolbarVisible: true,
@@ -2128,14 +2154,14 @@ class Scheduler extends Widget {
     }
 
     hideAppointmentPopup(saveChanges) {
-        if(this._appointmentPopup?.visible) {
+        if (this._appointmentPopup?.visible) {
             saveChanges && this._appointmentPopup.saveChangesAsync();
             this._appointmentPopup.hide();
         }
     }
 
     showAppointmentTooltip(appointment, element, targetedAppointment) {
-        if(appointment) {
+        if (appointment) {
             const settings = utils.dataAccessors.getAppointmentSettings(element);
 
             const appointmentConfig = {
@@ -2166,7 +2192,7 @@ class Scheduler extends Widget {
     }
 
     showAppointmentTooltipCore(target, data, options) {
-        if(this._appointmentTooltip.isAlreadyShown(target)) {
+        if (this._appointmentTooltip.isAlreadyShown(target)) {
             this.hideAppointmentTooltip();
         } else {
             this._appointmentTooltip.show(
@@ -2211,7 +2237,7 @@ class Scheduler extends Widget {
         this._actions[StoreEventNames.ADDING](addingOptions);
 
         return this._processActionResult(addingOptions, canceled => {
-            if(canceled) {
+            if (canceled) {
                 return new Deferred().resolve();
             }
 
@@ -2235,8 +2261,8 @@ class Scheduler extends Widget {
 
         this._actions[StoreEventNames.DELETING](deletingOptions);
 
-        this._processActionResult(deletingOptions, function(canceled) {
-            if(!canceled) {
+        this._processActionResult(deletingOptions, function (canceled) {
+            if (!canceled) {
                 getAppointmentDataProvider(this.key)
                     .remove(rawAppointment)
                     .always(storeAppointment => this._onDataPromiseCompleted(StoreEventNames.DELETED, storeAppointment, rawAppointment));
@@ -2245,7 +2271,7 @@ class Scheduler extends Widget {
     }
 
     focus() {
-        if(this._editAppointmentData) {
+        if (this._editAppointmentData) {
             this._appointments.focus();
         } else {
             this._workSpace.focus();

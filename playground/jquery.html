@@ -31,9 +31,11 @@
     <div id="button"></div>
     <script>
         $(function() {
-            $("#button").dxButton({
-                text: 'Click me!',
-                onClick: function() { alert("clicked"); }
+            $("#button").dxScheduler({
+                dataSource: [],
+                currentDate: new Date(),
+                currentView: 'day',
+                views: ['day', 'week', 'month'],
             });
         });
     </script>

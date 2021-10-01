@@ -39,6 +39,7 @@ export const viewFunction = ({
     accessKey,
     activeStateEnabled,
     disabled,
+    focusStateEnabled,
     height,
     hint,
     hoverStateEnabled,
@@ -85,7 +86,7 @@ export const viewFunction = ({
       accessKey={accessKey}
       activeStateEnabled={activeStateEnabled}
       disabled={disabled}
-      focusStateEnabled={false}// TODO: waiting for a toolbar wrapper rerender fix
+      focusStateEnabled={focusStateEnabled}
       height={height}
       hint={hint}
       hoverStateEnabled={hoverStateEnabled}
@@ -152,6 +153,7 @@ export const viewFunction = ({
 @Component({
   defaultOptionRules: null,
   view: viewFunction,
+  jQuery: { register: true }
 })
 export class Scheduler extends JSXComponent(SchedulerProps) {
   @InternalState() instance!: dxScheduler;
@@ -313,8 +315,8 @@ export class Scheduler extends JSXComponent(SchedulerProps) {
   }
 
   onViewRendered(viewMetaData: ViewMetaData): void {
-    this.viewDataProvider = viewMetaData.viewDataProvider;
-    this.cellsMetaData = viewMetaData.cellsMetaData;
+    // this.viewDataProvider = viewMetaData.viewDataProvider;
+    // this.cellsMetaData = viewMetaData.cellsMetaData;
   }
 
   setCurrentView(view: string): void {

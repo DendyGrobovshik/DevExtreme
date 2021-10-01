@@ -92,7 +92,10 @@ export type SchedulerToolbarProps = SchedulerToolbarBaseProps
 // eslint-disable-next-line @typescript-eslint/no-type-alias
 & Pick<SchedulerProps, 'currentView' | 'min' | 'max' | 'useDropDownViewSwitcher'>;
 
-@Component({ view: viewFunction })
+@Component({ 
+  view: viewFunction,
+  jQuery: { register: true },
+})
 export class SchedulerToolbar extends JSXComponent<SchedulerToolbarProps, 'items' | 'views' | 'onCurrentViewUpdate' | 'currentDate' | 'onCurrentDateUpdate' | 'startViewDate'>() {
   @InternalState() calendarVisible = false;
 
