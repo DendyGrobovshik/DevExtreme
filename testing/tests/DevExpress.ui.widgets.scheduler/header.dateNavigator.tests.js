@@ -55,6 +55,7 @@ test('should has correct caption(with agendaDuration)', function(assert) {
 
 test('should display correct caption after changing to day view if startDate is settled in views',
     function(assert) {
+
         const scheduler = createWrapper({
             currentDate: new Date(2021, 6, 28),
             currentView: 'month',
@@ -215,7 +216,7 @@ module('Option Changing', () => {
                 type: 'agenda',
                 agendaDuration: 5,
             }],
-            currentView: 'agemda',
+            currentView: 'agenda',
             currentDate: new Date(2021, 4, 7),
         });
         assert.equal(scheduler.header.navigator.getText(), '7-11 May 2021', 'Caption is correct');
